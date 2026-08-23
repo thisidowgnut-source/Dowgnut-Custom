@@ -7,6 +7,8 @@ import {
   useMotionValue,
   useTransform,
   useMotionValueEvent,
+  useVelocity,
+  useSpring,
   animate,
   type PanInfo,
   type MotionValue,
@@ -20,11 +22,27 @@ import type { Donut } from "@/lib/types";
 /**
  * DonutSlider — 3D ring display showing donuts of the selected category.
  * Center donut = active, with nutrition + qty + add to cart below.
+ *
+ * Motion language (per Emil Kowalski standards):
+ * - Snap spring inherits drag velocity + projects momentum → physical flicks.
+ * - The ring leans into its rotation (velocity-driven rotateZ, spring-smoothed).
+ * - Info card crossfades directionally in ~190ms — both cards animate
+ *   simultaneously (popLayout), no dead gap between donuts.
+ * - Newly-centered donut gets a small landing pulse (suppressed mid-drag).
+ * - Tap any side donut to spin it to center (pan handlers live on the ring
+ *   container itself, so clicks reach the cards).
  */
 
 const PX_PER_DONUT = 120; // 120px drag = 1 donut slot (fast, responsive drag)
 const TILT = 56;
 const RADIUS = 160;
+
+/** Strong ease-out — the house curve for enter/exit transitions. */
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+
+function clamp(v: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, v));
+}
 
 function wrapOffset(o: number, len: number) {
   if (len <= 0) return 0;
@@ -45,7 +63,7 @@ function slot(o: number, len: number) {
   const inFront = Math.abs(angleDeg) <= 100;
   const opacity = inFront ? Math.max(0.4, 1 - depth * 0.5) : 0;
   const scale = 1 - depth * 0.25;
-  const blur = depth * 3.5;
+  const blur = depth * 2.5; // capped — heavy blur on 8 live cards janks low-end phones
   const zIndex = Math.round(20 - depth * 30);
   return { x, y, scale, opacity, blur, zIndex };
 }
@@ -56,12 +74,16 @@ function RingCard({
   index,
   position,
   len,
+  isCenter,
+  dragging,
   onCenter,
 }: {
   donut: Donut;
   index: number;
   position: MotionValue<number>;
   len: number;
+  isCenter: boolean;
+  dragging: boolean;
   onCenter: () => void;
 }) {
   const wrapped = useTransform(position, (p: number) => wrapOffset(index - p, len));
@@ -69,7 +91,11 @@ function RingCard({
   const y = useTransform(wrapped, (o) => slot(o, len).y);
   const scale = useTransform(wrapped, (o) => slot(o, len).scale);
   const opacity = useTransform(wrapped, (o) => slot(o, len).opacity);
-  const filter = useTransform(wrapped, (o) => `blur(${slot(o, len).blur}px)`);
+  // `filter: none` for near-center cards — skips the blur compositing pipeline.
+  const filter = useTransform(wrapped, (o) => {
+    const b = slot(o, len).blur;
+    return b < 0.15 ? "none" : `blur(${b.toFixed(2)}px)`;
+  });
   const zIndex = useTransform(wrapped, (o) => slot(o, len).zIndex);
 
   return (
@@ -85,15 +111,25 @@ function RingCard({
         transformStyle: "preserve-3d",
         rotateX: -TILT,
       }}
-      className="absolute left-1/2 top-1/2 flex h-80 w-80 -translate-x-1/2 -translate-y-1/2 items-center justify-center cursor-pointer select-none sm:h-96 sm:w-96"
+      // Hit area (size-64/72) is intentionally tighter than the visual image
+      // (size-72/80) — the center card's old 384px hit box used to swallow
+      // taps meant for side donuts. Image overflows the button visually only.
+      className="absolute left-1/2 top-1/2 flex size-64 -translate-x-1/2 -translate-y-1/2 touch-pan-y items-center justify-center cursor-pointer select-none sm:size-72"
       aria-label={donut.name}
     >
-      <img
-        src={donut.imgUrl}
-        alt={donut.name}
-        className="size-72 object-contain sm:size-80 drop-shadow-xl"
-        draggable={false}
-      />
+      {/* Landing pulse — fires when this donut settles into center (not mid-drag). */}
+      <motion.div
+        animate={{ scale: isCenter && !dragging ? [1, 1.06, 1] : 1 }}
+        transition={{ duration: 0.34, ease: "easeOut" }}
+        className="flex items-center justify-center"
+      >
+        <img
+          src={donut.imgUrl}
+          alt={donut.name}
+          className="size-72 object-contain sm:size-80 drop-shadow-xl"
+          draggable={false}
+        />
+      </motion.div>
     </motion.button>
   );
 }
@@ -103,14 +139,15 @@ export function DonutSlider() {
   const filterType = useShop((s) => s.filterType);
   const setFilterType = useShop((s) => s.setFilterType);
   const loadingDonuts = useShop((s) => s.loadingDonuts);
-  const isFavorite = useShop((s) => s.isFavorite);
+  // Subscribe to the favorites ARRAY (not the helper fn) — hearts update live.
+  const favorites = useShop((s) => s.favorites);
   const toggleFavorite = useShop((s) => s.toggleFavorite);
   const addToCart = useShop((s) => s.addToCart);
-  const openDetail = useShop((s) => s.openDetail);
   const setView = useShop((s) => s.setView);
   const { toast } = useToast();
 
   const [added, setAdded] = useState(false);
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const donuts =
     filterType && filterType !== "all"
@@ -122,35 +159,95 @@ export function DonutSlider() {
   const [center, setCenter] = useState(0);
   const [qty, setQty] = useState(1);
   const [dragging, setDragging] = useState(false);
+  const [dir, setDir] = useState(1); // +1 → moving to next donut, -1 → previous
 
   const dragStartPos = useRef(0);
+  const lastPos = useRef(0);
+  // Where the current snap animation is heading — lets rapid keypresses
+  // queue up steps instead of getting eaten mid-spring.
+  const snapTarget = useRef(0);
 
-  // Reset position + center when category filter changes
-  useEffect(() => {
-    position.set(0);
-    setCenter(0);
+  // Ring leans into its rotation: velocity → capped rotateZ, spring-smoothed
+  // so the wobble settles naturally instead of tracking raw velocity jitter.
+  const velocity = useVelocity(position);
+  const tiltRaw = useTransform(velocity, (v) => clamp(-v * 0.8, -8, 8));
+  const tiltZ = useSpring(tiltRaw, { stiffness: 140, damping: 18 });
+
+  // Category change → reset picker state via React's "adjust state when a
+  // prop changes" pattern (during render — cheaper than an effect).
+  const catKey = `${filterType}:${len}`;
+  const [prevCatKey, setPrevCatKey] = useState(catKey);
+  if (prevCatKey !== catKey) {
+    setPrevCatKey(catKey);
     setQty(1);
     setAdded(false);
+  }
+
+  // …and spin the ring home smoothly instead of teleporting (external system
+  // sync — belongs in an effect; the center index follows via the listener).
+  useEffect(() => {
+    snapTarget.current = 0;
+    if (position.get() !== 0) {
+      animate(position, 0, { type: "spring", duration: 0.6, bounce: 0.12 });
+    }
   }, [filterType, len]);
 
-  // Real-time synchronization of center index with rotation
+  // Real-time sync of center index (+ travel direction) with rotation.
   useMotionValueEvent(position, "change", (p) => {
     if (len <= 0) return;
+    const delta = p - lastPos.current;
+    if (Math.abs(delta) > 0.001) setDir(delta > 0 ? 1 : -1);
+    lastPos.current = p;
     const wrapped = ((Math.round(p) % len) + len) % len;
-    setCenter(wrapped);
+    setCenter((c) => (c === wrapped ? c : wrapped));
   });
 
+  // Clear the "Added ✓" timer if the component unmounts mid-flight.
+  useEffect(() => {
+    return () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current);
+    };
+  }, []);
+
   const snapTo = (targetInt: number) => {
+    snapTarget.current = targetInt;
     animate(position, targetInt, {
+      // Apple-style spring — inherits the motion value's current velocity,
+      // so releases continue the flick instead of restarting from zero.
       type: "spring",
-      stiffness: 320,
-      damping: 28,
-      mass: 0.65,
+      duration: 0.42,
+      bounce: 0.22,
     });
   };
 
+  // Keyboard: ← → step between donuts (ignored while typing in inputs).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = document.activeElement;
+      if (
+        el &&
+        (el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          el.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        snapTo(snapTarget.current + 1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        snapTo(snapTarget.current - 1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const onPanStart = () => {
     dragStartPos.current = position.get();
+    snapTarget.current = Math.round(position.get());
     setDragging(true);
   };
 
@@ -160,24 +257,31 @@ export function DonutSlider() {
 
   const onPanEnd = (_: unknown, info: PanInfo) => {
     const currentPos = position.get();
-    let target = Math.round(currentPos);
-    
-    // Quick swipe / flick support
-    if (Math.abs(info.velocity.x) > 200) {
-      if (info.velocity.x < 0) {
-        target = Math.ceil(currentPos);
-      } else {
-        target = Math.floor(currentPos);
-      }
+    const travel = -info.velocity.x / PX_PER_DONUT; // donuts/sec; + = next donut
+    const projected = currentPos + travel * 0.15; // ~150ms of release momentum
+
+    let target: number;
+    if (Math.abs(info.velocity.x) > 250) {
+      // Deliberate flick: follow momentum, but always advance at least one
+      // slot in the travel direction, and never fling more than two.
+      target = Math.round(projected);
+      if (travel > 0) target = Math.max(target, Math.floor(currentPos) + 1);
+      else target = Math.min(target, Math.ceil(currentPos) - 1);
+    } else {
+      // Gentle release: snap to the nearest slot, ignore velocity noise.
+      target = Math.round(currentPos);
     }
-    
+    target = clamp(target, Math.ceil(currentPos) - 2, Math.floor(currentPos) + 2);
+
     snapTo(target);
     setDragging(false);
   };
 
   const centerThis = (index: number) => {
     if (len <= 0) return;
-    const current = Math.round(position.get());
+    // Base on the snap target (not live position) so taps during an
+    // in-flight spring still compute the shortest correct path.
+    const current = snapTarget.current;
     let delta = index - (((current % len) + len) % len);
     if (delta > len / 2) delta -= len;
     if (delta < -len / 2) delta += len;
@@ -214,10 +318,10 @@ export function DonutSlider() {
   const current = donuts[center];
   if (!current) return null;
 
-  const fav = isFavorite(current.id);
+  const fav = favorites.some((f) => f.donutId === current.id);
 
   const onFav = async () => {
-    const wasFav = isFavorite(current.id);
+    const wasFav = favorites.some((f) => f.donutId === current.id);
     await toggleFavorite(current.id);
     toast({
       title: wasFav ? "Removed from favorites" : "Saved to favorites 💖",
@@ -229,7 +333,8 @@ export function DonutSlider() {
     try {
       await addToCart(current.id, qty);
       setAdded(true);
-      setTimeout(() => setAdded(false), 1400);
+      if (addedTimer.current) clearTimeout(addedTimer.current);
+      addedTimer.current = setTimeout(() => setAdded(false), 1400);
       toast({ title: "Added to cart! 🛒", description: `${current.name} × ${qty}` });
     } catch {
       toast({ title: "Couldn't add to cart", variant: "destructive" });
@@ -252,27 +357,26 @@ export function DonutSlider() {
         <ArrowLeft className="size-5" />
       </motion.button>
 
-      {/* 3D ring with swipe/drag */}
-      <div
-        className="relative w-full flex-1 overflow-hidden"
+      {/* 3D ring — pan/drag handlers live on the container itself so taps
+          still reach the donut cards (no more blocking overlay). */}
+      <motion.div
+        className="relative w-full flex-1 overflow-hidden cursor-grab touch-pan-y active:cursor-grabbing"
         style={{
           perspective: "1600px",
           minHeight: "min(38vh, 300px)",
         }}
+        onPanStart={onPanStart}
+        onPan={onPan}
+        onPanEnd={onPanEnd}
+        role="group"
+        aria-label="Donut carousel"
       >
-        {/* Pan / drag interactive layer */}
         <motion.div
-          className="absolute inset-0 z-40 cursor-grab touch-pan-y active:cursor-grabbing"
-          onPanStart={onPanStart}
-          onPan={onPan}
-          onPanEnd={onPanEnd}
-        />
-
-        <div
           className="absolute inset-0"
           style={{
             transformStyle: "preserve-3d",
-            transform: `rotateX(${TILT}deg)`,
+            rotateX: TILT,
+            rotateZ: tiltZ,
           }}
         >
           {donuts.map((donut, i) => (
@@ -282,23 +386,29 @@ export function DonutSlider() {
               index={i}
               position={position}
               len={len}
+              isCenter={i === center}
+              dragging={dragging}
               onCenter={() => centerThis(i)}
             />
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Active donut info — sticky card style at the bottom */}
-      <AnimatePresence mode="wait">
+      {/* Active donut info — directional crossfade: the new card enters from
+          the side the donut arrived from while the old one exits (popLayout). */}
+      <AnimatePresence mode="popLayout">
         <motion.div
           key={current.id}
-          initial={{ opacity: 0, y: 10, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.98 }}
-          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+          initial={{ opacity: 0, y: 12, x: dir * 26, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -6, x: -dir * 18, scale: 0.98 }}
+          transition={{ duration: 0.19, ease: EASE_OUT }}
           className="mt-2 flex flex-col items-center gap-1.5 rounded-3xl border-2 border-[var(--color-dowgnut-blue-dark)]/10 bg-white/85 px-4 pb-3 pt-3 text-center shadow-lg backdrop-blur-md"
         >
-          <h2 className="text-base font-black leading-tight text-[var(--color-dowgnut-blue-dark)] sm:text-lg">
+          <h2
+            aria-live="polite"
+            className="text-base font-black leading-tight text-[var(--color-dowgnut-blue-dark)] sm:text-lg"
+          >
             {current.name}{" "}
             <span className="text-xs font-semibold text-[var(--color-dowgnut-blue-dark)]/45">
               ★{current.rating.toFixed(1)}
@@ -309,7 +419,7 @@ export function DonutSlider() {
           </p>
 
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-base font-black text-[var(--color-dowgnut-blue-dark)]">
+            <span className="text-base font-black tabular-nums text-[var(--color-dowgnut-blue-dark)]">
               RM {(current.price * qty).toFixed(2)}
             </span>
 
@@ -346,7 +456,7 @@ export function DonutSlider() {
               <span
                 aria-live="polite"
                 aria-label={`Quantity ${qty}`}
-                className="min-w-8 text-center text-sm font-extrabold text-[var(--color-dowgnut-blue-dark)] select-none"
+                className="min-w-8 text-center text-sm font-extrabold tabular-nums text-[var(--color-dowgnut-blue-dark)] select-none"
               >
                 {qty}
               </span>
@@ -387,8 +497,8 @@ export function DonutSlider() {
             )}
           </motion.button>
 
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-dowgnut-blue-dark)]/40 mt-0.5">
-            {filterType && filterType !== "all" ? `${filterType} · ` : ""}{`${center + 1}/${len} · swipe to explore`}
+          <p className="text-[10px] font-bold uppercase tracking-wider tabular-nums text-[var(--color-dowgnut-blue-dark)]/40 mt-0.5">
+            {filterType && filterType !== "all" ? `${filterType} · ` : ""}{`${center + 1}/${len} · swipe or ← → to explore`}
           </p>
         </motion.div>
       </AnimatePresence>
