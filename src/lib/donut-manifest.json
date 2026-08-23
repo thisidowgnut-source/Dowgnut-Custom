@@ -1,0 +1,547 @@
+{
+  "$schema": "./donut-manifest.schema.json",
+  "version": "2.0.0",
+  "totalDonuts": 28,
+  "standards": {
+    "cameraAngle": "45-degree top-down isometric",
+    "lighting": "soft studio key light at top-left with gentle ambient occlusion",
+    "doughGeometry": "golden-brown fluffy yeast/cake ring or brioche filled shell"
+  },
+  "donuts": [
+    {
+      "id": "classic-glazed",
+      "name": "Classic Glazed",
+      "type": "classic",
+      "price": 3.50,
+      "rating": 4.9,
+      "calories": 220,
+      "sugar": 10,
+      "fat": 8,
+      "stock": 60,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "thin translucent golden vanilla crackle glaze",
+        "topping": "none",
+        "dough": "golden-brown yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic1.png"
+    },
+    {
+      "id": "chocolate-cake-classic",
+      "name": "Chocolate Cake Classic",
+      "type": "classic",
+      "price": 3.90,
+      "rating": 4.7,
+      "calories": 290,
+      "sugar": 13,
+      "fat": 10,
+      "stock": 50,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "rich dark chocolate cocoa glaze",
+        "topping": "none",
+        "dough": "dark chocolate cake crumb ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic2.png"
+    },
+    {
+      "id": "maple-glaze-ring",
+      "name": "Maple Glaze Ring",
+      "type": "classic",
+      "price": 4.20,
+      "rating": 4.8,
+      "calories": 320,
+      "sugar": 15,
+      "fat": 11,
+      "stock": 35,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "warm amber Canadian maple glaze",
+        "topping": "glossy caramel finish",
+        "dough": "golden-brown yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic3.png"
+    },
+    {
+      "id": "powdered-sugar-donut",
+      "name": "Powdered Sugar Donut",
+      "type": "classic",
+      "price": 3.20,
+      "rating": 4.5,
+      "calories": 240,
+      "sugar": 11,
+      "fat": 8,
+      "stock": 70,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "none",
+        "topping": "pure white superfine powdered sugar dust",
+        "dough": "fluffy yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic4.png"
+    },
+    {
+      "id": "cinnamon-sugar-twist",
+      "name": "Cinnamon Sugar Twist",
+      "type": "classic",
+      "price": 3.80,
+      "rating": 4.6,
+      "calories": 260,
+      "sugar": 12,
+      "fat": 9,
+      "stock": 55,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "light butter wash",
+        "topping": "aromatic Ceylon cinnamon and granulated sugar crystal coating",
+        "dough": "twisted braided dough",
+        "core": "twist"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic5.png"
+    },
+    {
+      "id": "old-fashioned-sour-cream",
+      "name": "Old-Fashioned Sour Cream",
+      "type": "classic",
+      "price": 4.00,
+      "rating": 4.6,
+      "calories": 280,
+      "sugar": 12,
+      "fat": 10,
+      "stock": 45,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "thin vanilla milk glaze",
+        "topping": "craggy textured surface",
+        "dough": "textured sour cream cake donut",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic6.png"
+    },
+    {
+      "id": "toasted-coconut-glaze",
+      "name": "Toasted Coconut Glaze",
+      "type": "classic",
+      "price": 4.20,
+      "rating": 4.7,
+      "calories": 310,
+      "sugar": 14,
+      "fat": 12,
+      "stock": 40,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "vanilla cream glaze",
+        "topping": "crispy toasted organic golden coconut flakes",
+        "dough": "golden yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic7.png"
+    },
+    {
+      "id": "hainanese-kopi-o-glaze",
+      "name": "Hainanese Kopi-O Glaze",
+      "type": "classic",
+      "price": 4.50,
+      "rating": 4.8,
+      "calories": 270,
+      "sugar": 11,
+      "fat": 9,
+      "stock": 50,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "dark roast Malaysian Hainanese coffee crackle glaze",
+        "topping": "caramelized biscuit crumble",
+        "dough": "golden brioche ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutclassic/donut_classic8.png"
+    },
+
+    {
+      "id": "rainbow-birthday-sprinkle",
+      "name": "Rainbow Birthday Sprinkle",
+      "type": "sprinkled",
+      "price": 4.20,
+      "rating": 4.9,
+      "calories": 280,
+      "sugar": 13,
+      "fat": 10,
+      "stock": 65,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "strawberry pink glossy icing",
+        "topping": "dense rainbow jimmies sprinkles",
+        "dough": "golden yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutsprinkled/donut_sprinkled1.png"
+    },
+    {
+      "id": "chocolate-sprinkle-bomb",
+      "name": "Chocolate Sprinkle Bomb",
+      "type": "sprinkled",
+      "price": 4.50,
+      "rating": 4.8,
+      "calories": 300,
+      "sugar": 14,
+      "fat": 11,
+      "stock": 60,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "glossy dark chocolate icing",
+        "topping": "multi-colored rainbow sprinkle blast",
+        "dough": "cocoa yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutsprinkled/donut_sprinkled2.png"
+    },
+    {
+      "id": "strawberry-funfetti",
+      "name": "Strawberry Funfetti",
+      "type": "sprinkled",
+      "price": 4.40,
+      "rating": 4.7,
+      "calories": 290,
+      "sugar": 13,
+      "fat": 10,
+      "stock": 50,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "vibrant strawberry milkshake glaze",
+        "topping": "pastel confetti pearls and funfetti sprinkles",
+        "dough": "vanilla dough with baked-in confetti",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutsprinkled/donut_sprinkled3.png"
+    },
+    {
+      "id": "vanilla-bean-jimmie",
+      "name": "Vanilla Bean Jimmie",
+      "type": "sprinkled",
+      "price": 4.20,
+      "rating": 4.5,
+      "calories": 270,
+      "sugar": 12,
+      "fat": 9,
+      "stock": 70,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "pure white Madagascar vanilla bean glaze",
+        "topping": "dark chocolate vermicelli jimmies",
+        "dough": "golden yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutsprinkled/donut_sprinkled4.png"
+    },
+    {
+      "id": "confetti-fiesta-sparkle",
+      "name": "Confetti Fiesta Sparkle",
+      "type": "sprinkled",
+      "price": 4.60,
+      "rating": 4.7,
+      "calories": 310,
+      "sugar": 15,
+      "fat": 11,
+      "stock": 45,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "bright lemon-citrus yellow-white glaze",
+        "topping": "sparkling candy crystals and fiesta sprinkles",
+        "dough": "fluffy golden ring",
+        "core": "ring"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutsprinkled/donut_sprinkled5.png"
+    },
+    {
+      "id": "matcha-white-choco-sprinkle",
+      "name": "Matcha White Choco Sprinkle",
+      "type": "sprinkled",
+      "price": 4.80,
+      "rating": 4.8,
+      "calories": 290,
+      "sugar": 12,
+      "fat": 10,
+      "stock": 35,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "emerald Uji matcha tea glaze",
+        "topping": "white chocolate sprinkle pearls",
+        "dough": "matcha-infused yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "/brand/donuts/matcha-sprinkle.png"
+    },
+
+    {
+      "id": "boston-cream-bomb",
+      "name": "Boston Cream Bomb",
+      "type": "stuffed",
+      "price": 4.90,
+      "rating": 4.9,
+      "calories": 380,
+      "sugar": 17,
+      "fat": 13,
+      "stock": 45,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "glossy dark chocolate ganache dip",
+        "topping": "none",
+        "dough": "pillow brioche shell",
+        "core": "Bavarian vanilla custard cream filled"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed1.png"
+    },
+    {
+      "id": "raspberry-jelly-burst",
+      "name": "Raspberry Jelly Burst",
+      "type": "stuffed",
+      "price": 4.50,
+      "rating": 4.7,
+      "calories": 320,
+      "sugar": 14,
+      "fat": 11,
+      "stock": 55,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "crystal granulated sugar coating",
+        "topping": "sugar dusted",
+        "dough": "soft yeast shell",
+        "core": "tart organic raspberry jam core"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed2.png"
+    },
+    {
+      "id": "cookies-cream-core",
+      "name": "Cookies & Cream Core",
+      "type": "stuffed",
+      "price": 4.90,
+      "rating": 4.9,
+      "calories": 420,
+      "sugar": 19,
+      "fat": 15,
+      "stock": 40,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "white vanilla frosting",
+        "topping": "crunchy crushed dark Oreo cookies",
+        "dough": "cocoa-flecked brioche shell",
+        "core": "Oreo whipped cream filling"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed3.png"
+    },
+    {
+      "id": "lemon-curd-pocket",
+      "name": "Lemon Curd Pocket",
+      "type": "stuffed",
+      "price": 4.50,
+      "rating": 4.6,
+      "calories": 300,
+      "sugar": 14,
+      "fat": 11,
+      "stock": 50,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "crystalline Meyer citrus glaze",
+        "topping": "candied lemon zest speckles",
+        "dough": "golden brioche shell",
+        "core": "zesty tangy lemon curd filled"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed4.png"
+    },
+    {
+      "id": "salted-caramel-cloud",
+      "name": "Salted Caramel Cloud",
+      "type": "stuffed",
+      "price": 4.80,
+      "rating": 4.8,
+      "calories": 410,
+      "sugar": 18,
+      "fat": 14,
+      "stock": 45,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "golden burnt caramel glaze",
+        "topping": "flaky sea salt crystals",
+        "dough": "tender yeast shell",
+        "core": "dulce de leche caramel cream"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed5.png"
+    },
+    {
+      "id": "nutella-hazelnut-lava",
+      "name": "Nutella Hazelnut Lava",
+      "type": "stuffed",
+      "price": 5.20,
+      "rating": 4.9,
+      "calories": 440,
+      "sugar": 20,
+      "fat": 16,
+      "stock": 35,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "Nutella chocolate hazelnut dip",
+        "topping": "roasted chopped hazelnut crumbles",
+        "dough": "rich chocolate brioche shell",
+        "core": "molten hazelnut cocoa lava"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed6.png"
+    },
+    {
+      "id": "blueberry-cheesecake-fill",
+      "name": "Blueberry Cheesecake Fill",
+      "type": "stuffed",
+      "price": 4.90,
+      "rating": 4.8,
+      "calories": 390,
+      "sugar": 16,
+      "fat": 14,
+      "stock": 35,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "vanilla cream cheese frosting",
+        "topping": "wild blueberry coulis swirl and graham cracker crust",
+        "dough": "golden brioche shell",
+        "core": "New York style cheesecake filling"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed7.png"
+    },
+    {
+      "id": "strawberries-cream-stuffed",
+      "name": "Strawberries & Cream Stuffed",
+      "type": "stuffed",
+      "price": 4.90,
+      "rating": 4.8,
+      "calories": 360,
+      "sugar": 15,
+      "fat": 12,
+      "stock": 40,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "sweet strawberry glaze",
+        "topping": "freeze-dried strawberry dust",
+        "dough": "pillow brioche shell",
+        "core": "fresh strawberry compote and sweet Chantilly cream"
+      },
+      "imagePath": "https://romanejaquez.github.io/flutter-codelab4/assets/donutstuffed/donut_stuffed8.png"
+    },
+
+    {
+      "id": "pandan-gula-melaka",
+      "name": "Pandan Gula Melaka",
+      "type": "specialty",
+      "price": 4.90,
+      "rating": 5.0,
+      "calories": 310,
+      "sugar": 15,
+      "fat": 11,
+      "stock": 50,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "emerald green coconut pandan glaze",
+        "topping": "smoked Melaka palm sugar syrup drizzle and toasted coconut",
+        "dough": "pandan-infused fragrant brioche",
+        "core": "ring"
+      },
+      "imagePath": "/brand/donuts/donut_classic3.png"
+    },
+    {
+      "id": "teh-tarik-kaw-glaze",
+      "name": "Teh Tarik Kaw Glaze",
+      "type": "specialty",
+      "price": 4.80,
+      "rating": 4.9,
+      "calories": 330,
+      "sugar": 16,
+      "fat": 12,
+      "stock": 45,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "frothy amber pulled Ceylon milk-tea glaze",
+        "topping": "condensed milk spiral drizzle and tea dust",
+        "dough": "golden brioche ring",
+        "core": "ring"
+      },
+      "imagePath": "/brand/donuts/donut_classic4.png"
+    },
+    {
+      "id": "musang-king-durian-bomb",
+      "name": "Musang King Durian Bomb",
+      "type": "specialty",
+      "price": 6.50,
+      "rating": 4.9,
+      "calories": 420,
+      "sugar": 16,
+      "fat": 18,
+      "stock": 30,
+      "featured": true,
+      "visualTraits": {
+        "glaze": "vibrant golden yellow Musang King durian custard glaze",
+        "topping": "glossy yellow shine",
+        "dough": "soft brioche shell",
+        "core": "100% pure Raub Musang King durian custard filled"
+      },
+      "imagePath": "/brand/donuts/donut_stuffed3.png"
+    },
+    {
+      "id": "cameron-strawberry-drip",
+      "name": "Cameron Strawberry Drip",
+      "type": "specialty",
+      "price": 4.80,
+      "rating": 4.8,
+      "calories": 300,
+      "sugar": 14,
+      "fat": 10,
+      "stock": 40,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "ruby Cameron Highlands strawberry glaze",
+        "topping": "vibrant neon pink street graffiti drizzle pattern and ruby pearls",
+        "dough": "golden yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "/brand/donuts/donut_sprinkled3.png"
+    },
+    {
+      "id": "ipoh-white-coffee-glaze",
+      "name": "Ipoh White Coffee Glaze",
+      "type": "specialty",
+      "price": 4.80,
+      "rating": 4.8,
+      "calories": 320,
+      "sugar": 13,
+      "fat": 11,
+      "stock": 40,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "roasted Ipoh white coffee reduction glaze",
+        "topping": "velvety white foam drizzle and caramelized biscuit crumble",
+        "dough": "golden brioche ring",
+        "core": "ring"
+      },
+      "imagePath": "/brand/donuts/donut_classic5.png"
+    },
+    {
+      "id": "teh-tarik-classic-foam",
+      "name": "Teh Tarik Classic Foam",
+      "type": "specialty",
+      "price": 4.50,
+      "rating": 4.7,
+      "calories": 290,
+      "sugar": 12,
+      "fat": 10,
+      "stock": 45,
+      "featured": false,
+      "visualTraits": {
+        "glaze": "velvety milk-tea glaze",
+        "topping": "airy white foam crown with roasted Ceylon tea dust",
+        "dough": "golden yeast ring",
+        "core": "ring"
+      },
+      "imagePath": "/brand/donuts/donut_classic6.png"
+    }
+  ]
+}

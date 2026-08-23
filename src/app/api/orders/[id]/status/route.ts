@@ -1,0 +1,63 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { ensureReady } from "@/lib/ensure-ready";
+import { serializeOrder } from "@/lib/serialize";
+
+const VALID_STATUSES = new Set([
+  "preparing",
+  "baking",
+  "out_for_delivery",
+  "delivered",
+]);
+
+const ADMIN_KEY = process.env.ADMIN_API_KEY;
+
+// PATCH /api/orders/[id]/status  { status }  →  Order
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await ensureReady();
+    // Admin key check (enforced in production or when ADMIN_API_KEY is configured)
+    const providedKey = request.headers.get("x-admin-key");
+    if (ADMIN_KEY && providedKey !== ADMIN_KEY && process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const { id } = await params;
+    const body = await request.json();
+    const status = String(body.status ?? "").trim();
+
+    if (!VALID_STATUSES.has(status)) {
+      return NextResponse.json(
+        { error: `Invalid status. Must be one of: ${[...VALID_STATUSES].join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    const existing = await db.order.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json(
+        { error: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    const updated = await db.order.update({
+      where: { id },
+      data: { status },
+      include: { items: true },
+    });
+
+    return NextResponse.json(serializeOrder(updated));
+  } catch (err) {
+    console.error("[api/orders/[id]/status PATCH]", err);
+    return NextResponse.json(
+      { error: "Failed to update order status" },
+      { status: 500 }
+    );
+  }
+}

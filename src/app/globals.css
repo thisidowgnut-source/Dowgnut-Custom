@@ -8,6 +8,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -41,82 +42,184 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* DowgNut brand tokens (#EF9FBD, #FDEFEB, #297ABE) */
+  --color-dowgnut-blue: #297abe;
+  --color-dowgnut-blue-light: #5fa4d9;
+  --color-dowgnut-blue-dark: #07334f;
+  --color-dowgnut-pink: #ef9fbd;
+  --color-dowgnut-pink-soft: #fdefeb;
+  --color-dowgnut-pink-dark: #c93373;
+  --color-dowgnut-lime: #e8f866;
+  --color-dowgnut-lime-bright: #f7ffd6;
+  --color-dowgnut-lime-dark: #b9c96a;
+  --color-dowgnut-cream: #fdefeb;
+  --color-dowgnut-dough: #d4b36a;
+  --color-dowgnut-grey: #aea294;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+  /* DowgNut authentic strawberry frosting theme */
+  --background: #ef9fbd;          /* bubblegum frosting pink app bg */
+  --foreground: #07334f;          /* dark navy text */
+  --card: #fdefeb;                /* cream dough surface */
+  --card-foreground: #07334f;
+  --popover: #fdefeb;
+  --popover-foreground: #07334f;
+  --primary: #297abe;             /* bold dowgnut blue */
+  --primary-foreground: #ffffff;
+  --secondary: #f05a9b;           /* vibrant pink accent */
+  --secondary-foreground: #ffffff;
+  --muted: #fdefeb;
+  --muted-foreground: #3d5266;    /* WCAG AA on pink bg (was #5b6b78 = 3.2:1) */
+  --accent: #297abe;              /* brand blue accent */
+  --accent-foreground: #ffffff;
+  --destructive: #c93373;
+  --border: #07334f1f;
+  --input: #fdefeb;
+  --ring: #297abe;
+  --chart-1: #297abe;
+  --chart-2: #ef9fbd;
+  --chart-3: #fdefeb;
+  --chart-4: #d4b36a;
+  --chart-5: #07334f;
+  --sidebar: #fdefeb;
+  --sidebar-foreground: #07334f;
+  --sidebar-primary: #297abe;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ef9fbd;
+  --sidebar-accent-foreground: #07334f;
+  --sidebar-border: #07334f1a;
+  --sidebar-ring: #297abe;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #07334f;
+  --foreground: #fdefeb;
+  --card: #0a4368;
+  --card-foreground: #fdefeb;
+  --popover: #0a4368;
+  --popover-foreground: #fdefeb;
+  --primary: #ef9fbd;
+  --primary-foreground: #07334f;
+  --secondary: #297abe;
+  --secondary-foreground: #ffffff;
+  --muted: #0a4368;
+  --muted-foreground: #d6e2ec;    /* slightly lighter for AA on #0a4368 */
+  --accent: #5fa4d9;
+  --accent-foreground: #fdefeb;
+  --destructive: #c93373;
+  --border: #fdefeb1a;
+  --input: #0a4368;
+  --ring: #ef9fbd;
+  --chart-1: #ef9fbd;
+  --chart-2: #297abe;
+  --chart-3: #5fa4d9;
+  --chart-4: #d4b36a;
+  --chart-5: #fdefeb;
+  --sidebar: #0a4368;
+  --sidebar-foreground: #fdefeb;
+  --sidebar-primary: #ef9fbd;
+  --sidebar-primary-foreground: #07334f;
+  --sidebar-accent: #5fa4d9;
+  --sidebar-accent-foreground: #fdefeb;
+  --sidebar-border: #fdefeb1a;
+  --sidebar-ring: #ef9fbd;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  /* Visible focus ring on the pink background (default outline-ring/50
+     is too low-contrast against #ef9fbd) */
+  :where(button, a, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-dowgnut-blue-dark);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv01";
   }
+}
+
+/* ── DowgNut graffiti utilities ─────────────────────────── */
+@layer utilities {
+  .glass-card {
+    background: rgba(253, 239, 235, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(7, 51, 79, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+  .dark .glass-card {
+    background: rgba(7, 51, 79, 0.7);
+    border: 1px solid rgba(239, 159, 189, 0.2);
+  }
+  .graffiti-text {
+    font-family: var(--font-display), cursive, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .brand-stroke {
+    -webkit-text-stroke: 2px #07334f;
+    paint-order: stroke fill;
+  }
+  .drip-shadow {
+    filter: drop-shadow(0 6px 0 rgba(7, 51, 79, 0.18));
+  }
+  .lime-bg-grid {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(7, 51, 79, 0.08) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .scrollbar-dowgnut::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .scrollbar-dowgnut::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-dowgnut::-webkit-scrollbar-thumb {
+    background: #07579b55;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .scrollbar-dowgnut::-webkit-scrollbar-thumb:hover {
+    background: #07579b99;
+    background-clip: content-box;
+  }
+  .animate-float {
+    animation: dowgnut-float 4s ease-in-out infinite;
+  }
+  .animate-spin-slow {
+    animation: dowgnut-spin 22s linear infinite;
+  }
+  .animate-wiggle {
+    animation: dowgnut-wiggle 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes dowgnut-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes dowgnut-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes dowgnut-wiggle {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes dowgnut-drip {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: scaleY(1); transform-origin: top; opacity: 1; }
 }

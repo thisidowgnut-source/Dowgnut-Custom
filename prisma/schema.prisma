@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// DowgNut — Prisma schema for advanced donut e-commerce
+// SQLite datasource
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +10,119 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ── Catalog ────────────────────────────────────────────────
+model Donut {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  price       Float
+  type        String   // classic | sprinkled | stuffed | specialty | savory
+  imgUrl      String
+  tags        String   @default("") // comma-separated e.g. "chocolate,glazed"
+  rating      Float    @default(4.5)
+  calories    Int      @default(250)
+  sugar       Int      @default(10) // grams
+  fat         Int      @default(8)  // grams
+  stock       Int      @default(50)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cartItems   CartItem[]
+  favorites   Favorite[]
+  orderItems  OrderItem[]
+  reviews     Review[]
 }
 
-model Post {
+// ── Cart (single anonymous shopper per session) ────────────
+model CartItem {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  sessionId String
+  donutId   String
+  quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  donut Donut @relation(fields: [donutId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, donutId])
+}
+
+// ── Favorites / Wishlist ───────────────────────────────────
+model Favorite {
+  id        String   @id @default(cuid())
+  sessionId String
+  donutId   String
+  createdAt DateTime @default(now())
+
+  donut Donut @relation(fields: [donutId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, donutId])
+}
+
+// ── Orders ─────────────────────────────────────────────────
+model Order {
+  id             String   @id @default(cuid())
+  sessionId      String
+  customerName   String
+  customerEmail  String
+  customerPhone  String   @default("")
+  address        String
+  city           String
+  state          String   @default("")
+  zip            String
+  notes          String   @default("")
+  subtotal       Float
+  delivery       Float    @default(3.99)
+  sst            Float    @default(0)
+  total          Float
+  status         String   @default("preparing") // preparing | baking | out_for_delivery | delivered
+  etaMinutes     Int      @default(25)
+  paymentMethod  String   @default("")  // tng | duitnow | fpx | card | billplz
+  paymentRef     String?  // Billplz bill id
+  paymentUrl     String?  // Billplz hosted payment URL
+  paidAt         DateTime?
+  paidAmount     Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  items OrderItem[]
+  events OrderEvent[]
+}
+
+// ── Order events (status changes for live tracking) ────────
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  message   String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  donutId   String
+  name      String // snapshot
+  price     Float  // snapshot
+  imgUrl    String // snapshot
+  quantity  Int
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  donut Donut @relation(fields: [donutId], references: [id], onDelete: Restrict)
+}
+
+// ── Reviews ────────────────────────────────────────────────
+model Review {
+  id        String   @id @default(cuid())
+  donutId   String
+  sessionId String
+  author    String
+  rating    Int // 1-5
+  comment   String
+  createdAt DateTime @default(now())
+
+  donut Donut @relation(fields: [donutId], references: [id], onDelete: Cascade)
 }
