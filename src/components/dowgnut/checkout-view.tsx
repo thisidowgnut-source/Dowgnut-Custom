@@ -14,8 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-const FREE_DELIVERY_THRESHOLD = 25;
-const DELIVERY_FLAT = 3.99;
+import { computePricing } from "@/lib/pricing";
 
 type PaymentMethod = "tng" | "duitnow" | "card";
 
@@ -86,9 +85,7 @@ export function CheckoutView() {
   const [submitting, setSubmitting] = useState(false);
 
   const subtotal = cart.reduce((sum, c) => sum + c.donut.price * c.quantity, 0);
-  const delivery = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FLAT;
-  const sst = subtotal * 0.06; // 6% SST
-  const total = subtotal + delivery + sst;
+  const { delivery, sst, total } = computePricing(subtotal);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));

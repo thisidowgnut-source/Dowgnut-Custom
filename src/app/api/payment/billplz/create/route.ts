@@ -24,8 +24,16 @@ export async function POST(req: NextRequest) {
   const cfg = getBillplzConfig();
 
   // Dev fallback — no Billplz creds → simulate success so checkout flow
-  // stays unblocked. Mark the order as paid immediately.
+  // stays unblocked. NEVER active in production: a production deploy
+  // without credentials must fail loudly, not hand out free donuts.
   if (!cfg) {
+    if (process.env.NODE_ENV === "production" && process.env.PAYMENTS_ALLOW_DEV_FALLBACK !== "true") {
+      console.error("[billplz] missing credentials in production — refusing dev fallback");
+      return NextResponse.json(
+        { error: "Payment gateway not configured" },
+        { status: 503 },
+      );
+    }
     await db.order.update({
       where: { id: order.id },
       data: {
@@ -35,6 +43,13 @@ export async function POST(req: NextRequest) {
         status: "preparing",
       },
     });
+    await db.orderEvent.create({
+      data: {
+        orderId: order.id,
+        status: "preparing",
+        message: "Dev payment received — starting to bake! 🍩",
+      },
+    });
     return NextResponse.json({
       mode: "dev",
       paymentUrl: null,
@@ -42,9 +57,18 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (req.headers.get("origin") ?? "http://localhost:3000");
+  // Redirect/callback URLs must point at OUR origin. Trust the Origin header
+  // only in dev; production requires NEXT_PUBLIC_BASE_URL so a spoofed
+  // Origin can't redirect payers to an attacker host.
+  const envBase = process.env.NEXT_PUBLIC_BASE_URL;
+  if (process.env.NODE_ENV === "production" && !envBase) {
+    console.error("[billplz] NEXT_PUBLIC_BASE_URL missing in production");
+    return NextResponse.json(
+      { error: "Payment gateway not configured (base URL)" },
+      { status: 503 },
+    );
+  }
+  const baseUrl = envBase || (req.headers.get("origin") ?? "http://localhost:3000");
   const redirectUrl = `${baseUrl}/orders?paid=${order.id}`;
   const callbackUrl = `${baseUrl}/api/payment/billplz/webhook`;
 
@@ -75,8 +99,11 @@ export async function POST(req: NextRequest) {
       billId: bill.id,
     });
   } catch (err: any) {
+    // Log the full upstream detail server-side; return a generic message
+    // so Billplz API internals never leak to the browser.
+    console.error("[billplz] create failed:", err?.message);
     return NextResponse.json(
-      { error: err?.message ?? "Billplz create failed" },
+      { error: "Could not create payment bill. Please try again." },
       { status: 502 },
     );
   }

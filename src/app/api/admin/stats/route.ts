@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ensureReady } from "@/lib/ensure-ready";
+import { requireAdmin } from "@/lib/admin-auth";
 import type { AdminStats } from "@/lib/types";
-
-const ADMIN_KEY = process.env.ADMIN_API_KEY;
 
 // GET /api/admin/stats  →  AdminStats
 export async function GET(request: Request) {
-  // Admin key check (enforced in production or when ADMIN_API_KEY is configured)
-  const providedKey = request.headers.get("x-admin-key");
-  if (ADMIN_KEY && providedKey !== ADMIN_KEY && process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  // Fail-closed admin check (rejects when key unset, wrong key, or dev).
+  const denied = requireAdmin(request);
+  if (denied) return denied;
   
   try {
     await ensureReady();

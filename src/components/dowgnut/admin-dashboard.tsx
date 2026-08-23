@@ -27,6 +27,10 @@ import { apiFetch } from "@/lib/api";
 import type { AdminStats, OrderStatus } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { KeyRound } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -62,12 +66,29 @@ export function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Admin key gate — requested once, kept in sessionStorage for the tab.
+  const [adminKey, setAdminKey] = useState("");
+  const [keyInput, setKeyInput] = useState("");
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
+    const stored = sessionStorage.getItem("dowgnut-admin-key");
+    if (stored) {
+      setAdminKey(stored);
+      setAuthed(true);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!authed) return;
     let mounted = true;
     (async () => {
       try {
-        const data = await apiFetch<AdminStats>(`/api/admin/stats`);
+        const data = await apiFetch<AdminStats>(`/api/admin/stats`, {
+          headers: { "x-admin-key": adminKey },
+        });
         if (mounted) setStats(data);
       } catch (err: any) {
         if (mounted) setError(err?.message ?? "Failed to load stats");
@@ -78,7 +99,59 @@ export function AdminDashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [authed, adminKey]);
+
+  const onUnlock = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await apiFetch<AdminStats>(`/api/admin/stats`, {
+        headers: { "x-admin-key": keyInput },
+      });
+      sessionStorage.setItem("dowgnut-admin-key", keyInput);
+      setAdminKey(keyInput);
+      setAuthed(true);
+    } catch {
+      setError("Invalid admin key");
+      setLoading(false);
+    }
+  };
+
+  if (!authed && !loading) {
+    return (
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-4 px-4 py-20">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-[var(--color-dowgnut-pink)]/10">
+          <KeyRound className="size-7 text-[var(--color-dowgnut-pink)]" />
+        </div>
+        <h2 className="graffiti-text text-2xl text-[var(--color-dowgnut-blue-dark)]">
+          ADMIN ACCESS
+        </h2>
+        <p className="text-center text-sm text-[var(--color-dowgnut-blue-dark)]/60">
+          Enter the admin API key to view the dashboard.
+        </p>
+        <div className="w-full space-y-2">
+          <Label htmlFor="admin-key">Admin key</Label>
+          <Input
+            id="admin-key"
+            type="password"
+            value={keyInput}
+            onChange={(e) => setKeyInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onUnlock()}
+            placeholder="x-admin-key…"
+            autoComplete="off"
+          />
+        </div>
+        {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+        <Button
+          onClick={onUnlock}
+          disabled={!keyInput.trim()}
+          className="h-11 w-full rounded-full bg-[var(--color-dowgnut-pink)] font-bold text-white hover:bg-[var(--color-dowgnut-pink-dark)]"
+        >
+          Unlock Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

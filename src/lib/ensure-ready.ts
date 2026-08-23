@@ -57,17 +57,33 @@ const DDL = [
     "sessionId" TEXT NOT NULL,
     "customerName" TEXT NOT NULL,
     "customerEmail" TEXT NOT NULL,
+    "customerPhone" TEXT NOT NULL DEFAULT '',
     "address" TEXT NOT NULL,
     "city" TEXT NOT NULL,
+    "state" TEXT NOT NULL DEFAULT '',
     "zip" TEXT NOT NULL,
     "notes" TEXT NOT NULL DEFAULT '',
     "subtotal" REAL NOT NULL,
     "delivery" REAL NOT NULL DEFAULT 3.99,
+    "sst" REAL NOT NULL DEFAULT 0,
     "total" REAL NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'preparing',
     "etaMinutes" INTEGER NOT NULL DEFAULT 25,
+    "paymentMethod" TEXT NOT NULL DEFAULT '',
+    "paymentRef" TEXT,
+    "paymentUrl" TEXT,
+    "paidAt" DATETIME,
+    "paidAmount" REAL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS "OrderEvent" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "orderId" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "OrderEvent_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order" ("id") ON DELETE CASCADE
   )`,
   `CREATE TABLE IF NOT EXISTS "OrderItem" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -92,12 +108,38 @@ const DDL = [
   )`,
 ];
 
+// Migration patches for databases created by an OLDER version of this DDL
+// (pre-payment columns / pre-OrderEvent). SQLite has no "ADD COLUMN IF NOT
+// EXISTS", so we check PRAGMA table_info first. Each entry is
+// [table, column, ALTER statement].
+const DDL_MIGRATIONS: Array<[string, string, string]> = [
+  ["Order", "customerPhone", `ALTER TABLE "Order" ADD COLUMN "customerPhone" TEXT NOT NULL DEFAULT ''`],
+  ["Order", "state", `ALTER TABLE "Order" ADD COLUMN "state" TEXT NOT NULL DEFAULT ''`],
+  ["Order", "sst", `ALTER TABLE "Order" ADD COLUMN "sst" REAL NOT NULL DEFAULT 0`],
+  ["Order", "paymentMethod", `ALTER TABLE "Order" ADD COLUMN "paymentMethod" TEXT NOT NULL DEFAULT ''`],
+  ["Order", "paymentRef", `ALTER TABLE "Order" ADD COLUMN "paymentRef" TEXT`],
+  ["Order", "paymentUrl", `ALTER TABLE "Order" ADD COLUMN "paymentUrl" TEXT`],
+  ["Order", "paidAt", `ALTER TABLE "Order" ADD COLUMN "paidAt" DATETIME`],
+  ["Order", "paidAmount", `ALTER TABLE "Order" ADD COLUMN "paidAmount" REAL`],
+];
+
 let ready: Promise<void> | null = null;
 
 async function ensureReadyOnce(): Promise<void> {
   // 1. Apply schema (idempotent).
   for (const stmt of DDL) {
     await db.$executeRawUnsafe(stmt);
+  }
+
+  // 1b. Patch legacy databases missing newer columns (pre-payment DDL).
+  for (const [table, column, alter] of DDL_MIGRATIONS) {
+    const cols = (await db.$queryRawUnsafe(
+      `PRAGMA table_info("${table}")`,
+    )) as Array<{ name: string }>;
+    if (cols.length > 0 && !cols.some((c) => c.name === column)) {
+      await db.$executeRawUnsafe(alter);
+      console.log(`[ensure-ready] Migrated ${table}.${column}`);
+    }
   }
 
   // 2. Seed catalog if empty.

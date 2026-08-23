@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ensureReady } from "@/lib/ensure-ready";
+import { computePricing } from "@/lib/pricing";
 import { serializeOrder } from "@/lib/serialize";
-
-const DELIVERY_FLAT = 3.99;
-const FREE_DELIVERY_THRESHOLD = 25;
 
 // POST /api/orders  { sessionId, customerName, customerEmail, customerPhone?, address, city, state?, zip, notes?, paymentMethod? }
 // - reads session cart, snapshots each item, decrements donut stock,
@@ -48,27 +46,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate stock
-    for (const item of cart) {
-      if (item.donut.stock < item.quantity) {
-        return NextResponse.json(
-          {
-            error: `Insufficient stock for ${item.donut.name} (have ${item.donut.stock}, need ${item.quantity})`,
-          },
-          { status: 409 }
-        );
-      }
-    }
-
+    // Single source of pricing truth — identical to what the cart drawer
+    // and checkout view display (threshold is >=, matching the UI).
     const subtotal = cart.reduce(
       (sum, item) => sum + item.donut.price * item.quantity,
       0
     );
-    const delivery = subtotal > FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FLAT;
-    const sst = subtotal * 0.06; // 6% SST (Malaysia)
-    const total = subtotal + delivery + sst;
+    const { delivery, sst, total } = computePricing(subtotal);
 
     // Create order + items + decrement stock + clear cart in a transaction.
+    // Stock is validated ATOMICALLY inside the transaction: the conditional
+    // updateMany only succeeds when stock >= quantity, so two concurrent
+    // checkouts can never oversell the same donut.
     const order = await db.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
@@ -102,20 +91,39 @@ export async function POST(request: Request) {
       });
 
       for (const item of cart) {
-        await tx.donut.update({
-          where: { id: item.donutId },
+        const res = await tx.donut.updateMany({
+          where: { id: item.donutId, stock: { gte: item.quantity } },
           data: { stock: { decrement: item.quantity } },
         });
+        if (res.count !== 1) {
+          // Throwing rolls back the WHOLE transaction (order + items).
+          throw new Error(
+            `Insufficient stock for ${item.donut.name} — please refresh and try again.`
+          );
+        }
       }
 
       await tx.cartItem.deleteMany({ where: { sessionId } });
+
+      await tx.orderEvent.create({
+        data: {
+          orderId: created.id,
+          status: "preparing",
+          message: "Order received — the fryer is heating up! 🔥",
+        },
+      });
 
       return created;
     });
 
     return NextResponse.json(serializeOrder(order));
-  } catch (err) {
+  } catch (err: any) {
     console.error("[api/orders POST]", err);
+    // Stock failures thrown from the transaction are user-actionable —
+    // surface them as 409 instead of a generic 500.
+    if (err?.message?.startsWith("Insufficient stock")) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
     return NextResponse.json(
       { error: "Failed to create order" },
       { status: 500 }

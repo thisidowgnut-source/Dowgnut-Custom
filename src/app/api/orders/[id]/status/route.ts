@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ensureReady } from "@/lib/ensure-ready";
 import { serializeOrder } from "@/lib/serialize";
+import { requireAdmin } from "@/lib/admin-auth";
 
 const VALID_STATUSES = new Set([
   "preparing",
@@ -10,8 +11,6 @@ const VALID_STATUSES = new Set([
   "delivered",
 ]);
 
-const ADMIN_KEY = process.env.ADMIN_API_KEY;
-
 // PATCH /api/orders/[id]/status  { status }  →  Order
 export async function PATCH(
   request: Request,
@@ -19,14 +18,9 @@ export async function PATCH(
 ) {
   try {
     await ensureReady();
-    // Admin key check (enforced in production or when ADMIN_API_KEY is configured)
-    const providedKey = request.headers.get("x-admin-key");
-    if (ADMIN_KEY && providedKey !== ADMIN_KEY && process.env.NODE_ENV === "production") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    // Fail-closed admin check (rejects when key unset, wrong key, or dev).
+    const denied = requireAdmin(request);
+    if (denied) return denied;
     const { id } = await params;
     const body = await request.json();
     const status = String(body.status ?? "").trim();
@@ -50,6 +44,15 @@ export async function PATCH(
       where: { id },
       data: { status },
       include: { items: true },
+    });
+
+    // Record the transition so the tracking timeline stays truthful.
+    await db.orderEvent.create({
+      data: {
+        orderId: id,
+        status,
+        message: `Status updated to ${status.replace(/_/g, " ")} by admin.`,
+      },
     });
 
     return NextResponse.json(serializeOrder(updated));

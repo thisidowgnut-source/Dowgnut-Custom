@@ -12,7 +12,7 @@
  *   NEXT_PUBLIC_BASE_URL     — used to build redirect URLs
  */
 
-const SANDBOX = process.env.BILLPLZ_SANDBOX === "true";
+const SANDBOX = process.env.BILLPLZ_SANDBOX !== "false"; // sandbox UNLESS explicitly live
 const BASE = SANDBOX ? "https://www.billplz-sandbox.com" : "https://www.billplz.com";
 const API_V3 = `${BASE}/api/v3`;
 
@@ -108,15 +108,32 @@ export async function createBill(
 }
 
 /**
- * Verify Billplz webhook signature using the X-Signature header.
- * The signature is computed as: hex(HMAC-SHA256(signatureKey, rawBody)).
+ * Verify a Billplz webhook (redirect/callback) signature.
+ *
+ * Per Billplz docs, the signed string is built from the POST form fields:
+ *   1. Drop the `x_signature` field itself.
+ *   2. For every remaining field, concatenate `key + value` (e.g. `amount100`).
+ *   3. Sort those concatenations ascending, case-insensitive.
+ *   4. Join with `|`.
+ *   5. Signature = hex(HMAC-SHA256(X-Signature key, that string)).
+ *
+ * The signature itself arrives as the `x_signature` FORM FIELD (not a header).
  */
 export async function verifyWebhook(
   cfg: BillplzConfig,
   rawBody: string,
-  xSignature: string | null,
+  providedSignature: string | null,
 ): Promise<boolean> {
-  if (!xSignature) return false;
+  if (!providedSignature) return false;
+
+  const params = new URLSearchParams(rawBody);
+  params.delete("x_signature");
+
+  const source = [...params.entries()]
+    .map(([k, v]) => `${k}${v}`)
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .join("|");
+
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",
@@ -125,11 +142,11 @@ export async function verifyWebhook(
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(rawBody));
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(source));
   const hex = Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
-  return timingSafeEqual(hex, xSignature);
+  return timingSafeEqual(hex, providedSignature.toLowerCase());
 }
 
 function timingSafeEqual(a: string, b: string): boolean {

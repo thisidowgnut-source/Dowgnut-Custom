@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
-const FREE_DELIVERY_THRESHOLD = 25;
-const DELIVERY_FLAT = 3.99;
+import {
+  FREE_DELIVERY_THRESHOLD,
+  computePricing,
+} from "@/lib/pricing";
 
 export function CartDrawer() {
   const open = useShop((s) => s.cartOpen);
@@ -29,9 +30,7 @@ export function CartDrawer() {
   const { toast } = useToast();
 
   const subtotal = cart.reduce((sum, c) => sum + c.donut.price * c.quantity, 0);
-  const delivery = subtotal === 0 || subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FLAT;
-  const sst = subtotal * 0.06; // 6% SST
-  const total = subtotal + delivery + sst;
+  const { delivery, sst, total } = computePricing(subtotal);
   const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
   const progressPct = Math.min(100, (subtotal / FREE_DELIVERY_THRESHOLD) * 100);
   const itemCount = cart.reduce((n, c) => n + c.quantity, 0);
