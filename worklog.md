@@ -19,3 +19,22 @@ Stage Summary:
 - 12 fail diubah, lint 0 error 0 warning.
 - Ujian lulus semua: RM25 tepat → delivery RM0 (dulu RM3.99); IDOR session salah → 404; admin tanpa/salah key → 401, key betul → 200; webhook signature sah diterima (termasuk uppercase hex), sig salah/tampered amount ditolak; checkout penuh e2e berfungsi (order #CMT66HXV); admin gate UI berfungsi.
 - Konsep/brand/vibe TIDAK diubah — semua fix invisible kepada pengguna kecuali skrin admin baru.
+
+---
+Task ID: image-flavor-audit
+Agent: main (Z.ai Code)
+Task: Audit semua imej donut vs nama flavor + baiki mismatch (konsep kekal)
+
+Work Log:
+- Audit VLM 33 imej dalam public/brand/donuts (setiap imej diterangkan oleh vision model).
+- Hash md5 mendedahkan 12 fail "branded" hanyalah 3 imej unik diduplikasi: 6 fail purple sama (matcha/pandan/strawberry-*.png), 3 fail green sama (chocolate-*.png + durian-cream.png), 3 fail brown sama (teh-tarik*.png + kopi-classic.png).
+- Gaya tidak konsisten: imej generik = fotorealistik latar putih; imej branded = kartun latar berwarna → tidak boleh diguna terus.
+- 13 pembetulan: 9 imej baru DIJANA fotorealistik (toasted-coconut, pandan-gula-melaka, teh-tarik-kaw, matcha-white-choco, blueberry-cheesecake, teh-tarik-foam, ipoh-white-coffee, musang-king-durian, confetti-fiesta) + 4 remap semula imej sedia ada (Cameron Strawberry→classic7 pink, Chocolate Sprinkle Bomb→sprinkled3, Strawberry Funfetti→sprinkled4 pink, Vanilla Bean→sprinkled2).
+- VLM verify semula 9 imej baru: semua sepadan (pandan=hijau+drizzle gelap, matcha=hijau+white sprinkles, blueberry=purple+cream-filled, durian=custard kuning meleleh, confetti=rainbow).
+- seed-data.ts dikemas kini (13 entri) + DB live dipatch (13 updateMany berjaya).
+- Browser verify: semua imej 200 & dimuat tanpa broken image.
+
+Stage Summary:
+- 28/28 flavor kini mempunyai imej yang sepadan dari segi warna/topping dengan nama.
+- Konsep/nama/flavor/description/harga TIDAK diubah — hanya imgUrl dibetulkan.
+- 12 fail branded duplikasi (kartun) kekal di folder tapi tidak digunakan — boleh dipadam kemudian jika mahu.
