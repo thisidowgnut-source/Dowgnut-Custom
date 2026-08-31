@@ -138,3 +138,20 @@ Stage Summary:
 - Konsep app 100% kekal — semua struktur/komponen/flow/gamification/payment tak berubah; hanya copy & prompt di-layer.
 - AI Concierge kini bertutur DOH Language™ + rojak BM secara semula jadi dengan protokol produk sebenar.
 - Fasa seterusnya (dari data pengguna): Creative Database → Prompt Compiler → Multi-Agent — dokumen dalam brand-system/08-architecture-roadmap.md.
+
+---
+Task ID: git-push-main-prep
+Agent: main (Z.ai Code)
+Task: Sedia push projek ke main Dowgnut-Custom.git (user request)
+
+Work Log:
+- Semak git: branch main, 249 fail tracked, tree clean; tiada remote → tambah origin https://github.com/thisidowgnut-source/Dowgnut-Custom.git; fetch ok (repo public, main di 78a4e1b).
+- Dapatan: .env + db/custom.db TERTRACK (commit sebelum rule ignore ditambah) — repo public = ADMIN_API_KEY akan bocor. FIX: git rm --cached keduanya + exception !.env.example + db/*.db rule; cipta .env.example (placeholder selamat: DATABASE_URL, ADMIN_API_KEY, BILLPLZ_*, ZAI, PAYMENTS_ALLOW_DEV_FALLBACK); commit b81f7fd.
+- Dapatan: remote main ada kerja arah BERLAINAN (era cyan #297FC1 DOH-NUT, Fredoka+Nunito) + dokumen/aset tiada di lokal. SALVAGE sebelum push: README.md (align minimum ke brand DOHNUT: title, wordmark image, fonts Lilita One+Geist, tagline GOOD VIBE. GOOD DOH.), VERCEL_DEPLOY.md, GEMINI.md, IMPROVEMENT_PLAN.md, agent-ctx/3-*.md, public/videos/dowgnut-commercial.mp4 (3.9MB) + commercial-result.json; commit 1ec6964.
+- Remote-only assets lama (assets-new cyan, jpeg junk, hero-pink, logo.svg) TAK diselamatkan (bloat 86MB + dah diganti aset baru).
+- Push ujian: FAIL — "could not read Username" (GIT_TERMINAL_PROMPT=0). Tiada kredensial GitHub di mesin (tiada gh CLI/SSH/netrc/token/env).
+
+Stage Summary:
+- Repo 100% SIAP untuk push: security cleanup + docs salvage + video + brand README siap, remote origin ditambah.
+- SEKATAN: push memerlukan GitHub Personal Access Token (write) daripada user — machine tiada apa-apa kredensial.
+- Push akan jadi FORCE (history lokal & remote unrelated) → main remote diganti penuh dengan versi semasa; semua kandungan berguna remote telah diselamatkan ke lokal dulu; .env/db tidak akan di-push (selamat).
