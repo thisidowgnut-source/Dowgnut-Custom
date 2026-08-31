@@ -9,14 +9,39 @@ import {
 } from "@/lib/ai";
 import { serializeDonut } from "@/lib/serialize";
 import { DOH_BOY_PERSONA, DOH_TAGLINE } from "@/lib/doh-language";
+import { rateLimit, clientKeyFrom } from "@/lib/rate-limit";
 
 // POST /api/ai/concierge  { messages: ChatMessage[], sessionId? }
 // Returns { reply: string, donuts: Donut[] }
 export async function POST(request: Request) {
   try {
     await ensureReady();
+
+    // Cost guard: the concierge is public + unauthenticated — cap chatty
+    // clients per session/IP so a script can't burn AI credits.
+    const rl = rateLimit(`concierge:${clientKeyFrom(request)}`, 12, 60_000);
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "Too many messages — give DOH BOY a breather and try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } }
+      );
+    }
+
     const body = await request.json();
-    const incoming = Array.isArray(body.messages) ? body.messages : [];
+    // Sanitize history: only user/assistant roles (never trust a client
+    // "system" message = prompt injection), cap length + turns.
+    const incoming = (Array.isArray(body.messages) ? body.messages : [])
+      .filter(
+        (m: ChatMessage) =>
+          (m?.role === "user" || m?.role === "assistant") &&
+          typeof m?.content === "string" &&
+          m.content.trim().length > 0
+      )
+      .slice(-20)
+      .map((m: ChatMessage) => ({
+        role: m.role,
+        content: m.content.slice(0, 2000),
+      }));
 
     const catalog = await getCatalogForPrompt();
 

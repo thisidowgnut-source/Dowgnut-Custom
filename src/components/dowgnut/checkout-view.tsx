@@ -159,17 +159,44 @@ export function CheckoutView() {
         return;
       }
 
-      // 3. Fallback (inline confirmation)
+      // Dev fallback — the server marked the order paid (no Billplz creds
+      // in dev), so the inline confirmation + tracking jump is genuine.
+      if (billRes.ok && billData.mode === "dev") {
+        toast({
+          title: "Payment successful! 🍩",
+          description: `Order confirmed via ${PAYMENTS.find((p) => p.id === payment)?.name}.`,
+        });
+        celebrateOrderComplete();
+        playOrderComplete();
+        const donutNames = order.items.map((i: any) => i.name);
+        const types = cart.map((c) => c.donut.type);
+        recordOrder(donutNames, types);
+        startTracking(order.id, form.customerName);
+        return;
+      }
+
+      // 409 — this order was already paid (e.g. double submit). Jump to
+      // tracking instead of pretending a new payment went through.
+      if (billRes.status === 409) {
+        toast({
+          title: "Order already paid 🍩",
+          description: "DOH BOLEH! Taking you straight to your order.",
+        });
+        startTracking(order.id, form.customerName);
+        return;
+      }
+
+      // Real gateway failure (502/503/…) — the order is saved server-side,
+      // but the payment did NOT go through. Be honest about it so the
+      // customer can retry instead of being told it worked.
       toast({
-        title: "Payment successful! 🍩",
-        description: `Order confirmed via ${PAYMENTS.find((p) => p.id === payment)?.name}.`,
+        title: "Payment could not be started",
+        description:
+          billData?.error ??
+          "The payment gateway hiccuped. Your order is saved — please try again in a moment.",
+        variant: "destructive",
       });
-      celebrateOrderComplete();
-      playOrderComplete();
-      const donutNames = order.items.map((i: any) => i.name);
-      const types = cart.map((c) => c.donut.type);
-      recordOrder(donutNames, types);
-      startTracking(order.id, form.customerName);
+      return;
     } catch (err: any) {
       toast({
         title: "Couldn't place order",

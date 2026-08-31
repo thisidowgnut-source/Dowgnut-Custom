@@ -48,9 +48,24 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const SW_REGISTER = `
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+// PWA service worker: PRODUCTION-ONLY. In dev, Turbopack serves
+// stable-URL chunks whose CONTENT changes on every recompile — a cache-first
+// SW would freeze the app at a stale bundle, break HMR ("unrecoverable
+// error" reload loops) and poison e2e tests. Dev loads unregister any
+// leftover SW + purge its caches instead.
+const SW_DEV_CLEANUP = `
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      rs.forEach(function (r) { r.unregister(); });
+    }).catch(function () {});
+    if (window.caches) {
+      window.caches.keys().then(function (keys) {
+        keys.forEach(function (k) { window.caches.delete(k); });
+      }).catch(function () {});
+    }
+    return;
+`;
+
+const SW_PROD_REGISTER = `
     navigator.serviceWorker.register('/sw.js').then((reg) => {
       // Force-check for SW updates on every load (bypasses HTTP cache hints).
       reg.update().catch(() => {});
@@ -63,6 +78,12 @@ if ('serviceWorker' in navigator) {
       refreshing = true;
       window.location.reload();
     });
+`;
+
+const SW_REGISTER = `
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+${process.env.NODE_ENV === "production" ? SW_PROD_REGISTER : SW_DEV_CLEANUP}
   });
 }
 `;

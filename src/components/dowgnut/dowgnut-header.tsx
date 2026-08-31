@@ -30,7 +30,7 @@ export function DowgnutHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const go = (v: "shop" | "favorites" | "orders" | "admin") => {
+  const go = (v: "shop" | "swipe" | "favorites" | "orders" | "admin") => {
     setView(v);
     setMobileOpen(false);
   };
@@ -78,11 +78,13 @@ export function DowgnutHeader() {
             </AnimatePresence>
           </button>
 
-          {/* Mobile menu */}
+          {/* Menu — visible at ALL breakpoints. Desktop previously had
+              zero entry points for Admin (menu was sm:hidden) and Swipe Deck
+              was unreachable everywhere (setView("swipe") had 0 callers). */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <button
-                className={`inline-flex size-10 items-center justify-center rounded-full transition-colors sm:hidden ${
+                className={`inline-flex size-10 items-center justify-center rounded-full transition-colors ${
                   scrolled
                     ? "bg-white/10 text-white"
                     : "bg-[var(--color-dowgnut-blue-dark)]/15 text-[var(--color-dowgnut-blue-dark)]"
@@ -101,6 +103,7 @@ export function DowgnutHeader() {
               <div className="flex flex-col gap-2 px-4">
                 {[
                   { k: "shop", l: "Shop" },
+                  { k: "swipe", l: "Swipe Deck 🔥" },
                   { k: "favorites", l: "Favorites" },
                   { k: "orders", l: "Orders" },
                   { k: "admin", l: "Admin" },

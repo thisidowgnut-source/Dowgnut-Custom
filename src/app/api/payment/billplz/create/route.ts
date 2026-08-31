@@ -69,7 +69,10 @@ export async function POST(req: NextRequest) {
     );
   }
   const baseUrl = envBase || (req.headers.get("origin") ?? "http://localhost:3000");
-  const redirectUrl = `${baseUrl}/orders?paid=${order.id}`;
+  // P0 fix: the app is a single-page SPA — there is no /orders route.
+  // Redirect back to `/?paid=<id>`; Home reads the param and drops the
+  // customer straight into the live tracking view.
+  const redirectUrl = `${baseUrl}/?paid=${order.id}`;
   const callbackUrl = `${baseUrl}/api/payment/billplz/webhook`;
 
   try {

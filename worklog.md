@@ -176,3 +176,79 @@ Stage Summary:
 - BILLPLZ keys user sudah dikonfigur dalam Vercel env (sandbox flag tak diketahui nilai).
 - KEHADIRAN: AI Concierge/Designer atas Vercel PERLU Z.ai API key public milik user (key sandbox internal-only) — tambah ZAI_API_KEY (+ ZAI_BASE_URL endpoint public) dalam Vercel dashboard bila sedia.
 - Keselamatan: token GitHub/Vercel dihantar dalam chat — disarankan rotate selepas guna.
+
+---
+Task ID: 3-a
+Agent: Explore (project review)
+Task: Review menyeluruh projek DOHNUT — bug, security, performance, UX, dead code
+
+Work Log:
+- Baca worklog (178 baris) + struktur penuh projek; baca semua config (package.json, tsconfig, next.config, manifest.json, sw.js, Caddyfile, .gitignore, .env.example, prisma/schema.prisma).
+- Baca SEMUA 19 API route files (donuts, cart, favorites, orders, admin, billplz create/webhook, ai concierge/designer) + semua lib (db, ensure-ready, billplz, ai, pricing, session, admin-auth, serialize, api, doh-language, celebrations, sounds, seed-data, types) + kedua-dua store + hooks.
+- Baca semua 26 komponen dowgnut/* (swipe-view, donut-slider, checkout, detail-modal, cart-drawer, admin, tracking, concierge, designer, shareable-card, dll) + page.tsx/layout.tsx/globals.css.
+- Cross-check import setiap komponen (grep `from "@/components/dowgnut/` + relative imports) → inventory dead code komponen + trigger-reachability analysis (grep setView/designerOpen/conciergeOpen).
+- Audit aset public/ (42 fail donut, 28 dirujuk seed-data, 14 tak dirujuk; hero/, promo, video, hypebeast) — kira saiz dead assets (~22MB dari 26MB).
+- Audit dependency usage (grep next-auth, dnd-kit, mdxeditor, recharts, socket.io-client dll) → ~20 deps tak digunakan; recharts+socket.io-client static-import dalam bundle utama.
+- Grep TODO/FIXME (0), console.log (server-side sahaja), formatMYR/getBadges/playSwipe/parseJsonArray (dead exports), related/openDetail dalam detail-modal (dead locals).
+- Verify lint: `bunx eslint src --quiet` exit 0. Verify git: tree clean, .env/db tidak tracked.
+- Semak docs drift: README.md (32 flavor vs real 28, folder "dohnut/" vs "dowgnut/", next-themes claim palsu), VERCEL_DEPLOY.md (vercel.json/postinstall tiada), brand-system/02-doh-language.md ↔ doh-language.ts (MATCH ✓), IMPROVEMENT_PLAN.md (audit lama codebase lama).
+- Analisis khusus: aliran pembayaran Billplz (redirect URL → /orders tiada route → 404!), error path checkout ("Payment successful" pada kegagalan), fallback imej external GitHub di shop-home, hydration splashDone persist, socket fallback 5s di Vercel, DDL duplication schema vs ensure-ready.
+
+Stage Summary:
+- P0 (latent, bila Billplz live): redirect selepas bayar ke `/orders?paid=` — route TIDAK wujud (src/app hanya "/") → user jumpa 404 selepas bayar. Dan jika create bill GAGAL (502/503), UI papar "Payment successful! 🍩" — kegagalan dibayangkan sebagai berjaya (checkout-view.tsx:140-181).
+- P1: AI Designer + SwipeView UNREACHABLE — `designerOpen` tak pernah diset true oleh mana-mana komponen; `view:"swipe"` tak pernah diset — 2 fitur (325 baris + route /api/ai/designer) tak boleh diakses pengguna (grep verified 0 trigger).
+- P1: tiada rate-limit — /api/ai/* awam tanpa throttle (risiko burn kredit ZAI, designer jana imej 1024² setiap request).
+- P2 lain: fallback imej external romanejaquez.github.io di shop-home (offline PWA rosak + dependency pihak ketiga); DetailModal butang Add tak disabled bila stock 0 & cart tiada ceiling stock; admin hanya reachable via menu mobile (sm:hidden); hydration mismatch splashDone pada returning user; Float untuk wang; tiada @@index sessionId; DDL duplikat schema.prisma vs ensure-ready.ts; ~20 deps tak digunakan; recharts+socket.io-client dalam bundle utama (static import); 22MB aset mati dalam public/; docs drift README/VERCEL_DEPLOY (32 vs 28 flavor, path dohnut/ palsu).
+- Verified GOOD: webhook Billplz HMAC timing-safe + amount/bill cross-check + idempotent; admin-auth fail-closed constant-time; ownership 404; stock decrement atomik dalam transaction; pricing single-source; parseDonutBlock selamat; tiada XSS/SQLi/dangerouslySetInnerHTML dinamik; lint 0 error; .env tak tracked; doh-language.ts 100% match dokumen brand.
+- Konsep app TIDAK berubah — review sahaja, tiada fail projek diubah ( hanya worklog ini ditambah).
+
+---
+Task ID: 3-b
+Agent: Explore (Creative-OS review)
+Task: Analisis repo DOHNUT-Creative-OS & senarai calon merge ke projek
+
+Work Log:
+- Baca worklog.md (204 baris, termasuk task doh-brand-system-merge, git-push, 3-a) untuk konteks kerja lepas.
+- Baca SEMUA 33 fail /tmp/dohnut-creative-os (klon https://github.com/thisisdohnut/DOHNUT-Creative-OS.git): 8 root docs (README, ARCHITECTURE, PRD, DESIGN, ERP, PROMPT, INTEGRATION-E-COMMERCE, CONTRIBUTING), docs/00-system-index, docs/ai/ (3), docs/creative/ (4), docs/visual-ai/ (4), docs/governance/ (8), docs/schemas/ (2), docs/brand/ (1), docs/prompt-registry.yaml, assets/dohnut-creative-os-system-overview.svg (SVG dibaca via shell — Read tool tak support).
+- Baca semula projek: brand-system/ (semua 9 fail) + src/lib/doh-language.ts untuk delta analysis.
+- Baca kod live untuk cross-check konflik: src/lib/types.ts (Donut, DonutType, OrderStatus), src/app/api/ai/concierge/route.ts, src/app/api/ai/designer/route.ts, src/app/globals.css (token palet).
+- Git log repo: 15 commit terkini — unified PRD/ARCHITECTURE/DESIGN/ERP/PROMPT/blueprint + "define ecommerce integration contract with Dowgnut-Custom" (927941e).
+- Deep dive INTEGRATION-E-COMMERCE.md: kontrak 2-repo (thisisdohnut/DOHNUT-Creative-OS = creative truth; thisidowgnut-source/Dowgnut-Custom = commerce app — URL match repo sebenar projek), authority table, 6 endpoint illustrative, 8 event, 5 stage migration, security, DoD.
+- Deep dive schemas (data-contracts, asset-registry) + prompt-registry.yaml: field-level mapping ke Donut TS types & AI routes projek.
+- Delta analysis 3 kategori: (a) topik BARU (25+ fail: kontrak integrasi, benchmark visual + SHA-256, ERP, PRD, provider adapter, IP tiers, QG-01..11, glossary, SoT hierarchy, genome schema, asset registry, prompt-registry.yaml), (b) topik SAMA tapi versi/lebih detail (doh-language v1.0.0, doh-boy 20 modes, playbook PENUH 110 title vs ringkasan projek, visual-ai-engine v1.0.1 + tier T1-T5), (c) separuh duplikat (creative module docs vs brand-system 02-06 — bukan salinan literal, rendah pertindihan data app mapping).
+- Conflict watch dikenal pasti & disahkan dgn quote kedua-dua belah: SVG system-overview guna palet LAMA (#EF2027/#297ABE/#E8F866/#07334F) vs app live (#EF233C/#FDE047/#1D3557); DESIGN.md token brand.lime/brand.pink (era lama) + CTA "ADD TO DOH BOX" (app: "Add to Cart", grep 0 hit "DOH BOX"); brand-constitution "Signature / limited drops" vs DonutType app ada "savory"; ERP order lifecycle (DRAFT→PENDING_PAYMENT→PAID→...) vs OrderStatus app (preparing|baking|out_for_delivery|delivered); delta dictionary DOH (frasa projek tak ada dalam v1.0.0 kanonikal & sebaliknya); designer prefix "3D-style/glossy" vs arahan Creative-OS "avoid overly synthetic CGI / plastic food".
+- Ranking merge: HIGH = Master Visual Prompt + visual benchmark ke /api/ai/designer (stylePrefix → full template + AVOID list), prompt contract (role/constraints/output contract/self-check) ke concierge system prompt, union DOH dictionary ke doh-language.ts, QA result/gate schema sebagai kontrak TS untuk audit output AI; MEDIUM = playbook penuh 110 title/30 campaign ke brand-system/05, doh-boy 20 modes ke 03, brand constitution non-negotiables ke 01, quality-gates/governance/glossary sebagai brand-system/ tambahan, INTEGRATION doc sebagai rujukan kontrak 2-repo; LOW = PRD/ERP/DESIGN/README repo meta, CONTRIBUTING, changelog, skills-matrix, source-artifacts (binary tak ada dalam repo), SVG (palet lama — jangan guna).
+- Tiada fail projek diubah — hanya worklog ini ditambah.
+
+Stage Summary:
+- Repo Creative-OS ialah lapisan canonical bersemver (v1.0.0/v1.1.0) bagi brand system yang sama yg telah di-merge ke projek; ~60% kandungan kreatif bertindih dengan brand-system/ tapi versi repo lebih lengkap (playbook 110 vs ringkasan, 20 Doh Boy modes, prompt tiers, benchmark scorecard dgn threshold 9/8/8/8/8.5).
+- Top merge candidates (HIGH, effort S-M, risiko rendah — semua additive): (1) Master Visual Prompt + AVOID list + benchmark 3-soalan + scorecard → designer route & brand-system/06; (2) prompt contract structure (PROMPT.md §3-4) → concierge systemPrompt (kekalkan protokol JSON |||DONUTS|| 100%); (3) union DOH dictionary (frasa unik Creative-OS: DOH NUT SHARE, product language bank, forbidden patterns) → doh-language.ts + brand-system/02; (4) kontrak data (Creative Genome + QA result + Asset Registry) → src/lib/creative-contracts.ts untuk QA output AI masa depan.
+- Kontrak integrasi e-commerce: repo sendiri mengarah "Do not import the full Creative OS documentation into application runtime" — merge mesti selective (prompt/schemas/dictionary/governance), bukan wholesale copy; authority Commerce (=projek) untuk price/inventory/order kekal.
+- Konflik mesti dielak bila merge: JANGAN ambil nilai hex SVG/DESIGN.md (palet lama), JANGAN rename cart → "DOH BOX" (perubahan konsep user-visible), JANGAN ganti OrderStatus app dengan ERP lifecycle; treat dictionary sebagai UNION bukan replacement.
+
+---
+Task ID: full-review-improvements
+Agent: main (Z.ai Code)
+Task: Review menyeluruh projek (skill agent-browser/VLM + 2 Explore agents) + review repo DOHNUT-Creative-OS + implement fix P0/P1
+
+Work Log:
+- Semak git: push + Vercel deploy sesi lepas DAH siap (remote=local 2cd22b5). Clone DOHNUT-Creative-OS ke /tmp (33 fail).
+- Task 3-a (Explore agent): review penuh projek — jumpa P0 redirect bayaran ke /orders (route tak wujud → 404 selepas bayar), P1 kegagalan bayar ditunjuk sebagai berjaya, AI Designer + SwipeView yatim (designerOpen/view swipe tak pernah diaktifkan), tiada rate limit pada /api/ai/*, bundle recharts+socket.io statik, ~22MB aset mati, ~34 komponen shadun tak digunakan, drift README (32 flavor vs realiti 28).
+- Task 3-b (Explore agent): analisis penuh 33 fail Creative-OS + delta vs brand-system/ + kontrak integrasi INTEGRATION-E-COMMERCE.md (2-repo: Creative OS = brand truth/prompts/schemas; Dowgnut-Custom = commerce runtime; jangan import full docs ke runtime; schemas boleh jadi shared JSON versioned).
+- IMPLEMENT FIX 1 (P0): billplz redirect → /?paid=<id> + page.tsx baca param → startTracking + toast "DOH BOLEH!" + scrub URL (verified e2e: /?paid=<orderId> terus masuk tracking view).
+- IMPLEMENT FIX 2 (P1): checkout-view branch dev/409/gateway-failure dipisah — kegagalan gateway kini toast destructive jujur ("Payment could not be started") bukan "Payment successful".
+- IMPLEMENT FIX 3 (P1): FAB AI Designer (navy, Palette icon) atas FAB concierge — feature yatim diaktifkan semula (verified: dialog buka + generate matcha donut BERJAYA, data-URI img render).
+- IMPLEMENT FIX 4 (P1): menu header semua breakpoint (buang sm:hidden — desktop tiada akses admin sebelum ini) + item "Swipe Deck 🔥" (verified: swipe view 1/28 kad, Love action deck maju, classic filter).
+- IMPLEMENT FIX 5 (P1): src/lib/rate-limit.ts (in-memory fixed window) — concierge 12/min, designer 5/min per session/IP; sanitasi mesej concierge (role system ditolak, cap 20x2000 chars); designer error generik (tak bocor err.message). VERIFIED: request designer ke-6 → 429 "Too many generations — let the glaze dry for a minute".
+- IMPLEMENT FIX 6: .env.example PAYMENTS_ALLOW_DEV_FALLBACK default "false" + komen jelas.
+- DEBUG SAGA (payment flow stuck): gejala — selepas bayar, view stuck dengan div invisible membeku pada initial style (opacity:0) yang menelan semua klik. Diagnostik bertingkat: revert dynamic import (bukan punca) → git stash test → restart server → SW unregister → symlink log. PUNCA SEBENAR DUA LAPIS: (1) SERVICE WORKER cache-first /_next/static/ membekukan chunk dev pada versi lama (URL chunk Turbopack stabil, kandungan berubah) → HTML fresh + JS stale → HMR "unrecoverable error" full-reload loop → app mati; (2) AnimatePresence exit tracking freeze (div exiting tak pernah dibuang, absolute + pointer-events auto → block semua input).
+- FIX 7 (root cause SW): layout.tsx SW_REGISTER kini NODE_ENV-gated — production register penuh (PWA offline kekal 100%), dev auto-UNREGISTER + purge caches (dev sentiasa fresh chunk).
+- FIX 8 (root cause presence): page.tsx ditulis semula — SATU motion.div key={view} initial/animate TANPA AnimatePresence/exit. View lama unmount sincron, view baru slide-in (verified: 1 div sahaja dalam main selepas setiap peralihan, semua klik lulus). Nota: exit animation (zoom-out/slide-left 250ms) digugurkan demi deterministik — enter animation kekal.
+- Server & services: dev server restart bersih (double-fork setsid), mini-service order-tracking (3004) restart — socket live via gateway + REST polling fallback.
+- VERIFICATION PENUH (agent-browser + VLM + curl): payment e2e BERJAYA 3x (order #CMTHDLYZ/#CMTHDUCI — order dibina, dev-fallback bayar, tracking view LIVE: LIVE TRACKING + IN PROGRESS + ETA ~25min + timeline 4 langkah, VLM confirm visual); /?paid= redirect ✓; designer generate ✓; swipe + Love ✓; menu desktop + admin gate ✓; rate limit 429 ✓; lint 0 error; debug code sementara dibuang.
+
+Stage Summary:
+- 8 fix diimplement + verified browser (golden rule: konsep 0% berubah — semua fix ialah bugfix/restoration/hardening).
+- Root cause dev poisoning diselesaikan: SW dev-only unregister + struktur view deterministic.
+- Repo DOHNUT-Creative-OS sudah dianalisis penuh — merge plan HIGH/MEDIUM/LOW disediakan (laporan ke user); kontrak integrasi mengesahkan 2-repo architecture yang sedia ada betul.
+- Backlog P2 tinggal (cadangan, belum implement): image diet WebP (~10MB→2MB), padam dead code ~22MB + deps ~20, stock guard detail-modal, serializeOrder paidAt, index Prisma, lazy deps dalam admin/tracking, sync docs README/VERCEL.

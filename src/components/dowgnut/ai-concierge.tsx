@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Sparkles, Loader2 } from "lucide-react";
+import { Send, Sparkles, Loader2, Palette } from "lucide-react";
 import { useShop } from "@/store/use-shop";
 import {
   Sheet,
@@ -30,6 +30,8 @@ export function AIConcierge() {
   const setOpen = useShop((s) => s.setConciergeOpen);
   const aiConcierge = useShop((s) => s.aiConcierge);
   const openDetail = useShop((s) => s.openDetail);
+  const designerOpen = useShop((s) => s.designerOpen);
+  const setDesignerOpen = useShop((s) => s.setDesignerOpen);
 
   const [messages, setMessages] = useState<Bubble[]>([]);
   const [input, setInput] = useState("");
@@ -136,6 +138,31 @@ export function AIConcierge() {
           <span id="ai-concierge-hint" className="sr-only">
             Opens the DOH BOY concierge chat to recommend donuts, answer
             questions, and help you order.
+          </span>
+        </motion.button>
+      )}
+
+      {/* AI Donut Designer FAB — smaller navy button stacked above the
+          concierge FAB. Restores access to the built-but-orphaned designer
+          (designerOpen was previously never set true anywhere). */}
+      {!open && !designerOpen && (
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 220, damping: 16, delay: 0.08 }}
+          onClick={() => setDesignerOpen(true)}
+          aria-label="Open AI Donut Designer"
+          aria-describedby="ai-designer-hint"
+          className="group fixed right-4 z-40 inline-flex size-11 items-center justify-center rounded-full bg-[var(--color-dowgnut-blue)] text-white shadow-lg shadow-[var(--color-dowgnut-blue-dark)]/40 transition-transform hover:scale-105 active:scale-95 sm:right-6"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + 9.5rem)",
+          }}
+        >
+          <Palette className="size-5 transition-transform group-hover:rotate-12" />
+          <span id="ai-designer-hint" className="sr-only">
+            Opens the AI Donut Designer to dream up and render a custom donut
+            from a text prompt.
           </span>
         </motion.button>
       )}
