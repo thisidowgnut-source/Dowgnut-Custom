@@ -96,3 +96,24 @@ Stage Summary:
 - Root cause: service worker cache-first serve stale HTML — bukan code tak berubah.
 - v2 network-first navigations: deploy baru sentiasa kelihatan; offline shell kekal berfungsi (konsep PPA intact).
 - User perlu refresh preview panel 2x (kali 1: SW lama serve stale sambil SW baru install; kali 2: network-first serve tema baru) atau hard refresh sekali.
+
+---
+Task ID: old-logo-sweep
+Agent: main (Z.ai Code)
+Task: User report "masih ada logo lama" — sweep semua aset branding lama
+
+Work Log:
+- Audit penuh rujukan imej dalam src: jumpa maskot LAMA (dowgnut-mascot.png, fail Aug 23 — pink donut + teks "DOWGNUT" graffiti lime/hot-pink lama terukir dalam imej) digunakan di 9 komponen LIVE: ai-concierge (avatar header), cart-drawer, donut-slider, error-boundary, favorites-view, orders-view, swipe-view, shareable-card (hypebeast-icon.png = duplicate md5 sama).
+- Wordmark header/splash dah baru — tapi maskot lama ni yang user nampak "logo lama" di concierge + empty states.
+- HeroCarousel + VideoCommercial + DowgNutFooter = DEAD CODE (tak diimport) — hero-banner.png lama tak visible tapi promo-1/2.png DIRUJUK TAPI TAK WUJUD (latent broken).
+- Jana maskot baru (1024x1024, QC VLM: tiada teks, gaya sticker) → sharp circular mask 512px transparent corners → replace dowgnut-mascot.png + hypebeast-icon.png (75KB).
+- favicon.ico (Aug 23 lama) → rebuild ICO container sah (16/32/48 PNG entries) dari app-icon Doh-Nut baru.
+- Jana 3 imeg brand baru utk dead-code carousel (future-proof): hero-banner (subject kanan, ruang teks kiri), promo-1 (glazing scene — 2 percubaan sebab v1 ada teks), promo-2 (AI robot concierge) — semua QC VLM lulus (no text, palette kuning/merah/navy).
+- Cleanup: padam 5 fail jpeg root tak dirujuk (download_*, e1751*, photo_*) + hero-blue/pink/mobile (5MB+) + dowgnut-brand-reference.jpg + logo.svg — semua confirmed tiada rujukan dalam src.
+- Verify browser: concierge header maskot baru ✓ (VLM: "cute pink donut mascot on yellow circle, no old graffiti logo"), Saved + Orders empty states maskot baru ✓, semua img load ✓, tiada console error, dev.log bersih, lint 0 error.
+
+Stage Summary:
+- SEMUA logo/branding lama sudah tiada dalam aset yang digunakan: wordmark baru (header/splash), maskot baru (concierge/empty states/share card), favicon.ico baru, app icons baru.
+- Konsep kekal 100% — hanya file imej diganti; tiada struktur/komponen diubah.
+- user perlu refresh 2x (SW v2 network-first akan serve baru selepas controllerchange reload).
+- Dead code (carousel/video/footer) kekal ada tapi kini dengan aset konsisten jika diaktifkan semula.
