@@ -51,7 +51,18 @@ export const viewport: Viewport = {
 const SW_REGISTER = `
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      // Force-check for SW updates on every load (bypasses HTTP cache hints).
+      reg.update().catch(() => {});
+    }).catch(() => {});
+    // When a new service worker takes control, reload once so the fresh
+    // shell replaces the stale page (guarded to avoid reload loops).
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   });
 }
 `;

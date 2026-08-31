@@ -1,5 +1,7 @@
 // DowgNut Service Worker — enables PWA install + offline shell caching.
-const CACHE = "dowgnut-v1";
+// v2: network-first navigations so users ALWAYS get the latest deployed UI
+// (v1 served stale cached HTML after redeploys). Offline shell still works.
+const CACHE = "dowgnut-v2";
 const SHELL = [
   "/",
   "/manifest.json",
@@ -30,9 +32,10 @@ self.addEventListener("fetch", (e) => {
   // Only handle GET.
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  const sameOrigin = url.origin === self.location.origin;
 
-  // Network-first for API + donut images (always fresh).
-  if (url.pathname.startsWith("/api/") || url.hostname.includes("romanejaquez")) {
+  // Cross-origin (e.g. donut CDN images): network-first (always fresh).
+  if (!sameOrigin) {
     e.respondWith(
       fetch(req)
         .then((res) => {
@@ -45,18 +48,64 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Cache-first for static assets (app shell).
+  // API calls: network-first, cache only as offline fallback.
+  if (url.pathname.startsWith("/api/")) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req).then((r) => r || new Response("Offline", { status: 503 })))
+    );
+    return;
+  }
+
+  // Page navigations (HTML): network-first — guarantees fresh UI after
+  // redeploys/theme changes; cached shell only when offline.
+  if (req.mode === "navigate") {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() =>
+          caches.match(req).then((r) => r || caches.match("/"))
+        )
+    );
+    return;
+  }
+
+  // Content-hashed Next.js build assets: cache-first (immutable URLs).
+  if (url.pathname.startsWith("/_next/static/")) {
+    e.respondWith(
+      caches.match(req).then(
+        (cached) =>
+          cached ||
+          fetch(req)
+            .then((res) => {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+              return res;
+            })
+            .catch(() => cached)
+      )
+    );
+    return;
+  }
+
+  // Brand assets (logo, icons, manifest): network-first so logo updates
+  // appear immediately; cached copy only as offline fallback.
   e.respondWith(
-    caches.match(req).then(
-      (cached) =>
-        cached ||
-        fetch(req)
-          .then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-            return res;
-          })
-          .catch(() => cached)
-    )
+    fetch(req)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(req).then((r) => r || new Response("Offline", { status: 503 })))
   );
 });

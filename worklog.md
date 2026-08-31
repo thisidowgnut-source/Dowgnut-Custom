@@ -79,3 +79,20 @@ Stage Summary:
 - Logo rasmi Doh-Nut + tema kuning (#FDE047) / merah (#EF233C) / navy (#1D3557) / butter (#FFF9DB) TERPASANG dan TERBUKTI berfungsi e2e.
 - Konsep app, struktur komponen, 32 flavor, AI Concierge, gamification — semua kekal tak berubah.
 - Nota VLM: font bubbly wordmark kadang tersalah baca oleh vision model (Krispy Kreme/Play-Doh) — DOM + analisa logo asal mengesahkan ia wordmark Doh-Nut dari fail upload pengguna.
+
+---
+Task ID: sw-cache-stale-fix
+Agent: main (Z.ai Code)
+Task: User report "masih nampak sama" selepas rebrand — diagnosis & fix cache service worker
+
+Work Log:
+- Diagnosis: kod globals.css MEMANG ada warna baru (verified rg — semua token fde047/ef233c/1d3557). Masalah bukan code — SW `dowgnut-v1` cache-first untuk HTML navigasi "/" → browser user serve HTML LAMA (pre-rebrand) dari cache selamanya.
+- Fix public/sw.js (v2): bump CACHE "dowgnut-v2" (activate auto-delete v1); navigations → NETWORK-FIRST + offline fallback cached shell; /_next/static/ kekal cache-first (content-hash, selamat); brand assets & API → network-first; cross-origin → network-first. Konsep PWA (installable + offline shell) KEKAL.
+- Fix layout.tsx SW_REGISTER: reg.update() force-check setiap load + controllerchange auto-reload (guarded anti-loop) — update masa depan auto-apply.
+- Ujian: node --check sw.js OK, lint 0 error, SW v2 register + cache "dowgnut-v2" sahaja (v1 terpadam), OFFLINE TEST LULUS — page load offline dgn bg rgb(253,224,71) = #FDE047 (tema baru!), online reload → bg sama + logo wordmark baru.
+- VLM verify screenshot: background #FDE047 yellow, button merah, teks navy — tema baru terbukti serve.
+
+Stage Summary:
+- Root cause: service worker cache-first serve stale HTML — bukan code tak berubah.
+- v2 network-first navigations: deploy baru sentiasa kelihatan; offline shell kekal berfungsi (konsep PPA intact).
+- User perlu refresh preview panel 2x (kali 1: SW lama serve stale sambil SW baru install; kali 2: network-first serve tema baru) atau hard refresh sekali.
