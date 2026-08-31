@@ -46,10 +46,10 @@ export function FavoritesView() {
             className="h-24 w-24 animate-float object-contain"
           />
           <h3 className="graffiti-text text-2xl text-[var(--color-dowgnut-blue-dark)]">
-            No favorites yet
+            DOH MY GOSH!
           </h3>
           <p className="text-sm text-[var(--color-dowgnut-blue-dark)]/70">
-            Tap the heart on any donut to save it here.
+            No favorites yet — DOH NUT MISS OUT. Tap the heart on any donut to save it here.
           </p>
           <Button
             onClick={() => setView("shop")}

@@ -117,3 +117,24 @@ Stage Summary:
 - Konsep kekal 100% — hanya file imej diganti; tiada struktur/komponen diubah.
 - user perlu refresh 2x (SW v2 network-first akan serve baru selepas controllerchange reload).
 - Dead code (carousel/video/footer) kekal ada tapi kini dengan aset konsisten jika diaktifkan semula.
+
+---
+Task ID: doh-brand-system-merge
+Agent: main (Z.ai Code)
+Task: Merge data brand system DOHNUT (recap pengguna: DOH Language™, Doh Boy™, tagline, Pop Culture, Visual AI Engine, AI Docs) ke dalam projek — konsep app kekal
+
+Work Log:
+- Audit semua titik merge: concierge prompt, designer prompt, splash tagline, empty states, teks DOWGNUT user-visible, manifest, metadata, footer, toast, Billplz description.
+- BINA brand-system/ (single source of truth, 9 fail): README (indeks + integrasi live), 01-brand-truth (positioning, tagline GOOD VIBE. GOOD DOH., palet, Play-Doh feeling rules, strategi high-end), 02-doh-language (dictionary penuh EN+MY+MIX, peraturan penggunaan, mapping konteks app), 03-doh-boy (character canon, voice, concierge binding), 04-doh-cinema-dohflix (parody titles, guardrail ringkas), 05-pop-culture-playbook (skop, formula, 90-day roadmap), 06-visual-ai-engine (Creative Genome, Master Prompt, Visual QA 3-soalan, Visual DNA template), 07-ai-documentation-system (prompt/skill/markdown standard), 08-architecture-roadmap (system map, cabaran, 4 fasa).
+- BINA src/lib/doh-language.ts — DOH dictionary typed (DOH_CORE/MALAYSIAN/MIX/BY_CONTEXT), DOH_TAGLINE, DOH_BOY_PERSONA (untuk system prompt), containsDohPhrase helper.
+- Concierge route: systemPrompt guna DOH_BOY_PERSONA + brand line DOHNUT + tagline; PROTOKOL KATALOG & JSON BLOCK KEKAL 100% (format |||DONUTS||...|||END||| tak disentuh).
+- AI Designer route: stylePrefix LAMA ("neon lime background" — palet lama!) DIGANTI dengan Visual DNA baharu (premium tactile squishy, kuning #FDE047, merah #EF233C, navy #1D3557) — rujuk 06-visual-ai-engine.
+- UI merge: splash tagline "FRESH · BOLD · DELIVERED" → "GOOD VIBE · GOOD DOH."; cart empty → "DOH NUT WORRY!"; favorites empty → "DOH MY GOSH!"; orders empty → "DOH NUT WAIT!" + "DOH BOLEH!"; error boundary → "DOH NUT PANIC!"; concierge header → "DOH BOY™" + subtitle tagline; intro message → "DOH NUT WORRY — I got you..."; toast → "DOH SEDAP! Added to cart 🍩"; tracking → "Thanks for choosing DOHNUT. DOH WEI, want another round?".
+- Nama brand user-visible diselaraskan ke DOHNUT (merge data pengguna): metadata title/applicationName, manifest name/short_name/description, share card + share text, footer "© 2025 DOHNUT — Good Vibe. Good Doh. · GangNiaga Sdn. Bhd.", Billplz bill description. Code identifier/nama fail/aria KEKAL (invisible).
+- Lint 0 error. Browser verify: title "DOHNUT — Donut Delivery" ✓; concierge header DOH BOY™ ✓; reply BM betul-betul guna DOH Language: "DOH SEDAP! Pandan Gula Melaka tu signature kami, rasa betul-betul Malaysia. Atau kalau suka creamy, Boston Cream Bomb pun giler sedap." + 6 kad donut attach (protokol recommend intact) ✓; empty states 3/3 ✓; 0 console error. VLM verify screenshot: "DOH BOY™... DOH NUT WORRY, DOH SEDAP!... product cards attached" ✓.
+
+Stage Summary:
+- Data brand system pengguna kini TER-MERGE sepenuhnya: dokumentasi (brand-system/ 9 fail) + live integration (concierge Doh Boy voice, DOH Language UI, tagline, designer Visual DNA, nama DOHNUT).
+- Konsep app 100% kekal — semua struktur/komponen/flow/gamification/payment tak berubah; hanya copy & prompt di-layer.
+- AI Concierge kini bertutur DOH Language™ + rojak BM secara semula jadi dengan protokol produk sebenar.
+- Fasa seterusnya (dari data pengguna): Creative Database → Prompt Compiler → Multi-Agent — dokumen dalam brand-system/08-architecture-roadmap.md.

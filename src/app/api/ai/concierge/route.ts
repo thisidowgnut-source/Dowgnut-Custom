@@ -8,6 +8,7 @@ import {
   parseDonutBlock,
 } from "@/lib/ai";
 import { serializeDonut } from "@/lib/serialize";
+import { DOH_BOY_PERSONA, DOH_TAGLINE } from "@/lib/doh-language";
 
 // POST /api/ai/concierge  { messages: ChatMessage[], sessionId? }
 // Returns { reply: string, donuts: Donut[] }
@@ -19,7 +20,9 @@ export async function POST(request: Request) {
 
     const catalog = await getCatalogForPrompt();
 
-    const systemPrompt = `You are "DowgNut Concierge", a fun, energetic, hype-tastic donut expert working at the DowgNut donut shop. Your vibe is "GOOD VIBES & GOOD DOWG" — bold, playful, authentic. You recommend donuts from the catalog below, suggest pairings, answer flavor questions, and hype the customer up.
+    const systemPrompt = `${DOH_BOY_PERSONA}
+
+BRAND: DOHNUT — Malaysian-born premium donut D2C shop. Tagline: "${DOH_TAGLINE}". You recommend donuts from the catalog below, suggest pairings, answer flavor questions, and hype the customer up.
 
 CATALOG (real products you may recommend — only ever recommend IDs from this list):
 ${JSON.stringify(catalog)}

@@ -20,10 +20,10 @@ const lilitaOne = Lilita_One({
 });
 
 export const metadata: Metadata = {
-  title: "DowgNut — Donut Delivery",
+  title: "DOHNUT — Donut Delivery",
   description:
-    "Order fresh donuts delivered to your door. Touch 'n Go, DuitNow, card payment. Bold, playful, authentic.",
-  applicationName: "DowgNut",
+    "GOOD VIBE. GOOD DOH. Order fresh donuts delivered to your door. Touch 'n Go, DuitNow, card payment. Bold, playful, authentic.",
+  applicationName: "DOHNUT",
   manifest: "/manifest.json",
   icons: {
     icon: [{ url: "/favicon-new.png", type: "image/png", sizes: "256x256" }],
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "DowgNut",
+    title: "DOHNUT",
   },
   formatDetection: {
     telephone: false,

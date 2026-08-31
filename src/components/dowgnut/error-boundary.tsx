@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<
             className="h-28 w-28 animate-float object-contain"
           />
           <h2 className="graffiti-text text-2xl text-[var(--color-dowgnut-blue-dark)]">
-            Something went sideways
+            DOH NUT PANIC!
           </h2>
           <p className="max-w-sm text-sm text-[var(--color-dowgnut-blue-dark)]/70">
             {this.state.error?.message || "An unexpected error occurred."}

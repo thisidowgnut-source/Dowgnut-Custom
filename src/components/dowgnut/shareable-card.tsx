@@ -51,8 +51,8 @@ export function ShareableDonutCard({ donut, onClose }: { donut: Donut; onClose: 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `${donut.name} on DowgNut`,
-          text: `Check out ${donut.name} on DowgNut! 🍩`,
+          title: `${donut.name} on DOHNUT`,
+          text: `Check out ${donut.name} on DOHNUT! 🍩 GOOD VIBE. GOOD DOH.`,
         });
       } else {
         download();
@@ -92,7 +92,7 @@ export function ShareableDonutCard({ donut, onClose }: { donut: Donut; onClose: 
           >
             <div className="flex items-center gap-2">
               <img src="/brand/hypebeast-icon.png" alt="" className="size-8 rounded-full" />
-              <span className="graffiti-text text-sm text-white">DOWGNUT</span>
+              <span className="graffiti-text text-sm text-white">DOHNUT</span>
             </div>
 
             <div className="flex flex-1 items-center justify-center">

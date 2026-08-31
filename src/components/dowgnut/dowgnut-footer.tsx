@@ -125,7 +125,7 @@ export function DowgnutFooter() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-white/60 sm:flex-row sm:px-6">
-          <p>© 2025 DowgNut — Good Vibes &amp; Good Dowg</p>
+          <p>© 2025 DOHNUT — Good Vibe. Good Doh. · GangNiaga Sdn. Bhd.</p>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setView("admin")}

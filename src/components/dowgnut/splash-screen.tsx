@@ -88,10 +88,10 @@ export function SplashScreen() {
             />
           ))}
 
-          {/* Original DowgNut wordmark logo */}
+          {/* DOHNUT wordmark — brand logo rasmi (alt text) */}
           <motion.img
             src="/brand/dowgnut-logo-wordmark.png"
-            alt="DowgNut"
+            alt="DOHNUT"
             className="h-20 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] sm:h-28"
             draggable={false}
             initial={{ scale: 0.5, opacity: 0, y: 20 }}
@@ -106,7 +106,7 @@ export function SplashScreen() {
             transition={{ delay: 0.8, duration: 0.5 }}
             className="mt-4 text-xs font-medium tracking-[0.3em] text-[var(--color-dowgnut-lime)]"
           >
-            FRESH · BOLD · DELIVERED
+            GOOD VIBE · GOOD DOH.
           </motion.p>
         </motion.div>
       )}

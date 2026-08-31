@@ -65,10 +65,10 @@ export function OrdersView() {
             className="h-24 w-24 animate-float object-contain"
           />
           <h3 className="graffiti-text text-2xl text-[var(--color-dowgnut-blue-dark)]">
-            No orders yet
+            DOH NUT WAIT!
           </h3>
           <p className="text-sm text-[var(--color-dowgnut-blue-dark)]/70">
-            Place your first order and watch it travel to your door in real time.
+            No orders yet — DOH BOLEH! Place your first order and watch it travel to your door in real time.
           </p>
           <Button
             onClick={() => setView("shop")}

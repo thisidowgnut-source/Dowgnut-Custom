@@ -432,7 +432,7 @@ export function OrderTrackingView() {
             Enjoy your dowgs!
           </h2>
           <p className="mt-1 text-sm text-[var(--color-dowgnut-blue-dark)]/70">
-            Thanks for choosing DowgNut. Want another round?
+            Thanks for choosing DOHNUT. DOH WEI, want another round?
           </p>
           <Button
             onClick={onOrderAgain}

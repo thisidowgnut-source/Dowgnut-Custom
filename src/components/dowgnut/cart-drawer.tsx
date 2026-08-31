@@ -134,10 +134,10 @@ export function CartDrawer() {
               />
               <div className="space-y-0.5">
                 <h3 className="graffiti-text text-lg text-[var(--color-dowgnut-blue-dark)]">
-                  Your Box is Empty!
+                  DOH NUT WORRY!
                 </h3>
                 <p className="text-xs text-[var(--color-dowgnut-blue-dark)]/60">
-                  Pick your favorite flavors and start filling up your box.
+                  Your box is empty… for now. Pick your flava and fill it up with some DOH.
                 </p>
               </div>
               <Button

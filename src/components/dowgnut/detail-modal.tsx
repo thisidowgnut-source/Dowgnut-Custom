@@ -75,7 +75,7 @@ export function DetailModal() {
     try {
       await addToCart(donut.id, qty);
       toast({
-        title: buyNow ? "Opening cart…" : "Added to cart! 🍩",
+        title: buyNow ? "Opening cart…" : "DOH SEDAP! Added to cart 🍩",
         description: `${donut.name} × ${qty} (RM ${(donut.price * qty).toFixed(2)})`,
       });
       if (buyNow) {

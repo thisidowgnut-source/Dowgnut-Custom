@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
   try {
     const bill = await createBill(cfg, {
       amount: order.total,
-      description: `DowgNut order #${order.id.slice(0, 8)}`,
+      description: `DOHNUT order #${order.id.slice(0, 8)}`,
       referenceId: order.id,
       customerName: order.customerName,
       customerEmail: order.customerEmail,

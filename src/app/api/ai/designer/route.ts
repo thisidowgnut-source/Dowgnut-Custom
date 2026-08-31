@@ -16,8 +16,11 @@ export async function POST(request: Request) {
       );
     }
 
+    // DOHNUT Visual DNA (brand-system/06-visual-ai-engine.md):
+    // premium tactile squishy look, kuning #FDE047 canvas, aksen merah #EF233C
+    // + navy #1D3557. Ganti prefix lama "neon lime" — konsisten dengan rebrand.
     const stylePrefix =
-      "vibrant graffiti-style donut illustration, bold colors, neon lime background, drip details, product photography style, centered, ";
+      "premium food photography, glossy tactile squishy 3D-style donut, golden-brown dough, bold bright yellow background (#FDE047), red (#EF233C) and dark navy (#1D3557) accents, thick outlines, playful streetwear energy, centered composition, social-media ready, ";
 
     const zai = await getZai();
     const response = await zai.images.generations.create({

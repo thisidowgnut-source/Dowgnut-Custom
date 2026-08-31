@@ -42,7 +42,8 @@ export function AIConcierge() {
         {
           id: "intro",
           role: "assistant",
-          content: "Hey! What are you craving today? 🍩",
+          content:
+            "DOH NUT WORRY — I got you. What you craving today? 🍩",
         },
       ]);
     }
@@ -133,7 +134,7 @@ export function AIConcierge() {
           />
           {/* Screen-reader hint */}
           <span id="ai-concierge-hint" className="sr-only">
-            Opens the DowgNut Concierge chat to recommend donuts, answer
+            Opens the DOH BOY concierge chat to recommend donuts, answer
             questions, and help you order.
           </span>
         </motion.button>
@@ -153,10 +154,10 @@ export function AIConcierge() {
               />
               <div>
                 <p className="graffiti-text text-xl leading-none">
-                  DowgNut Concierge
+                  DOH BOY™
                 </p>
                 <p className="text-xs font-normal text-white/70">
-                  Your AI donut whisperer
+                  Your AI donut whisperer — GOOD VIBE. GOOD DOH.
                 </p>
               </div>
             </SheetTitle>
