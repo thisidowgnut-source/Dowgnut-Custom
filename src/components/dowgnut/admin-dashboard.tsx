@@ -246,17 +246,17 @@ export function AdminDashboard() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.hourlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#07334f20" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1d355720" />
                 <XAxis
                   dataKey="hour"
-                  tick={{ fontSize: 10, fill: "#07334f" }}
+                  tick={{ fontSize: 10, fill: "#1d3557" }}
                   interval={3}
                 />
-                <YAxis tick={{ fontSize: 10, fill: "#07334f" }} />
+                <YAxis tick={{ fontSize: 10, fill: "#1d3557" }} />
                 <Tooltip
                   contentStyle={{
-                    background: "#fff9e8",
-                    border: "2px solid #07579b",
+                    background: "#fff9db",
+                    border: "2px solid #3d5a80",
                     borderRadius: 12,
                     fontSize: 12,
                   }}
@@ -264,9 +264,9 @@ export function AdminDashboard() {
                 <Line
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#f05a9b"
+                  stroke="#ef233c"
                   strokeWidth={3}
-                  dot={{ r: 3, fill: "#07579b" }}
+                  dot={{ r: 3, fill: "#3d5a80" }}
                   activeDot={{ r: 5 }}
                 />
               </LineChart>
@@ -289,23 +289,23 @@ export function AdminDashboard() {
                 layout="vertical"
                 margin={{ left: 20, right: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#07334f20" />
-                <XAxis type="number" tick={{ fontSize: 10, fill: "#07334f" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1d355720" />
+                <XAxis type="number" tick={{ fontSize: 10, fill: "#1d3557" }} />
                 <YAxis
                   type="category"
                   dataKey="name"
-                  tick={{ fontSize: 10, fill: "#07334f" }}
+                  tick={{ fontSize: 10, fill: "#1d3557" }}
                   width={90}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#fff9e8",
-                    border: "2px solid #07579b",
+                    background: "#fff9db",
+                    border: "2px solid #3d5a80",
                     borderRadius: 12,
                     fontSize: 12,
                   }}
                 />
-                <Bar dataKey="qty" fill="#07579b" radius={[0, 8, 8, 0]} />
+                <Bar dataKey="qty" fill="#3d5a80" radius={[0, 8, 8, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -336,15 +336,15 @@ export function AdminDashboard() {
                     <Cell
                       key={i}
                       fill={PIE_COLORS[i % PIE_COLORS.length]}
-                      stroke="#fff9e8"
+                      stroke="#fff9db"
                       strokeWidth={2}
                     />
                   ))}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    background: "#fff9e8",
-                    border: "2px solid #07579b",
+                    background: "#fff9db",
+                    border: "2px solid #3d5a80",
                     borderRadius: 12,
                     fontSize: 12,
                   }}

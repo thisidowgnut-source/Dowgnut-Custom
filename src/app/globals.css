@@ -43,97 +43,97 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* DowgNut brand tokens (#EF9FBD, #FDEFEB, #297ABE) */
-  --color-dowgnut-blue: #297abe;
-  --color-dowgnut-blue-light: #5fa4d9;
-  --color-dowgnut-blue-dark: #07334f;
-  --color-dowgnut-pink: #ef9fbd;
-  --color-dowgnut-pink-soft: #fdefeb;
-  --color-dowgnut-pink-dark: #c93373;
-  --color-dowgnut-lime: #e8f866;
-  --color-dowgnut-lime-bright: #f7ffd6;
-  --color-dowgnut-lime-dark: #b9c96a;
-  --color-dowgnut-cream: #fdefeb;
-  --color-dowgnut-dough: #d4b36a;
+  /* Doh-Nut official brand tokens — from the logo: yellow #FDE047, red #EF233C, navy #1D3557 */
+  --color-dowgnut-blue: #3d5a80;
+  --color-dowgnut-blue-light: #98c1d9;
+  --color-dowgnut-blue-dark: #1d3557;
+  --color-dowgnut-pink: #ef233c;
+  --color-dowgnut-pink-soft: #fde0e3;
+  --color-dowgnut-pink-dark: #c1121f;
+  --color-dowgnut-lime: #fde047;
+  --color-dowgnut-lime-bright: #fef9d8;
+  --color-dowgnut-lime-dark: #d4b106;
+  --color-dowgnut-cream: #fff9db;
+  --color-dowgnut-dough: #e8c468;
   --color-dowgnut-grey: #aea294;
 }
 
 :root {
   --radius: 0.75rem;
-  /* DowgNut authentic strawberry frosting theme */
-  --background: #ef9fbd;          /* bubblegum frosting pink app bg */
-  --foreground: #07334f;          /* dark navy text */
-  --card: #fdefeb;                /* cream dough surface */
-  --card-foreground: #07334f;
-  --popover: #fdefeb;
-  --popover-foreground: #07334f;
-  --primary: #297abe;             /* bold dowgnut blue */
+  /* Doh-Nut theme: logo yellow bg + red actions + navy ink */
+  --background: #fde047;          /* signature logo yellow app bg */
+  --foreground: #1d3557;          /* logo navy text */
+  --card: #fff9db;                /* butter cream surface */
+  --card-foreground: #1d3557;
+  --popover: #fff9db;
+  --popover-foreground: #1d3557;
+  --primary: #ef233c;             /* logo red — hero actions */
   --primary-foreground: #ffffff;
-  --secondary: #f05a9b;           /* vibrant pink accent */
+  --secondary: #1d3557;           /* logo navy accent */
   --secondary-foreground: #ffffff;
-  --muted: #fdefeb;
-  --muted-foreground: #3d5266;    /* WCAG AA on pink bg (was #5b6b78 = 3.2:1) */
-  --accent: #297abe;              /* brand blue accent */
+  --muted: #fff9db;
+  --muted-foreground: #3a4f63;    /* AA on yellow bg (~5.5:1) */
+  --accent: #ef233c;              /* logo red accent */
   --accent-foreground: #ffffff;
-  --destructive: #c93373;
-  --border: #07334f1f;
-  --input: #fdefeb;
-  --ring: #297abe;
-  --chart-1: #297abe;
-  --chart-2: #ef9fbd;
-  --chart-3: #fdefeb;
-  --chart-4: #d4b36a;
-  --chart-5: #07334f;
-  --sidebar: #fdefeb;
-  --sidebar-foreground: #07334f;
-  --sidebar-primary: #297abe;
+  --destructive: #c1121f;
+  --border: #1d35571f;
+  --input: #fff9db;
+  --ring: #ef233c;
+  --chart-1: #ef233c;
+  --chart-2: #1d3557;
+  --chart-3: #d4b106;
+  --chart-4: #e8c468;
+  --chart-5: #98c1d9;
+  --sidebar: #fff9db;
+  --sidebar-foreground: #1d3557;
+  --sidebar-primary: #ef233c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ef9fbd;
-  --sidebar-accent-foreground: #07334f;
-  --sidebar-border: #07334f1a;
-  --sidebar-ring: #297abe;
+  --sidebar-accent: #fde047;
+  --sidebar-accent-foreground: #1d3557;
+  --sidebar-border: #1d35571a;
+  --sidebar-ring: #ef233c;
 }
 
 .dark {
-  --background: #07334f;
-  --foreground: #fdefeb;
-  --card: #0a4368;
-  --card-foreground: #fdefeb;
-  --popover: #0a4368;
-  --popover-foreground: #fdefeb;
-  --primary: #ef9fbd;
-  --primary-foreground: #07334f;
-  --secondary: #297abe;
-  --secondary-foreground: #ffffff;
-  --muted: #0a4368;
-  --muted-foreground: #d6e2ec;    /* slightly lighter for AA on #0a4368 */
-  --accent: #5fa4d9;
-  --accent-foreground: #fdefeb;
-  --destructive: #c93373;
-  --border: #fdefeb1a;
-  --input: #0a4368;
-  --ring: #ef9fbd;
-  --chart-1: #ef9fbd;
-  --chart-2: #297abe;
-  --chart-3: #5fa4d9;
-  --chart-4: #d4b36a;
-  --chart-5: #fdefeb;
-  --sidebar: #0a4368;
-  --sidebar-foreground: #fdefeb;
-  --sidebar-primary: #ef9fbd;
-  --sidebar-primary-foreground: #07334f;
-  --sidebar-accent: #5fa4d9;
-  --sidebar-accent-foreground: #fdefeb;
-  --sidebar-border: #fdefeb1a;
-  --sidebar-ring: #ef9fbd;
+  --background: #1d3557;
+  --foreground: #fff9db;
+  --card: #26436b;
+  --card-foreground: #fff9db;
+  --popover: #26436b;
+  --popover-foreground: #fff9db;
+  --primary: #ef233c;
+  --primary-foreground: #ffffff;
+  --secondary: #fde047;
+  --secondary-foreground: #1d3557;
+  --muted: #26436b;
+  --muted-foreground: #d6e2ec;    /* slightly lighter for AA on #26436b */
+  --accent: #98c1d9;
+  --accent-foreground: #1d3557;
+  --destructive: #c1121f;
+  --border: #fff9db1a;
+  --input: #26436b;
+  --ring: #ef233c;
+  --chart-1: #ef233c;
+  --chart-2: #fde047;
+  --chart-3: #98c1d9;
+  --chart-4: #e8c468;
+  --chart-5: #fff9db;
+  --sidebar: #26436b;
+  --sidebar-foreground: #fff9db;
+  --sidebar-primary: #ef233c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #98c1d9;
+  --sidebar-accent-foreground: #1d3557;
+  --sidebar-border: #fff9db1a;
+  --sidebar-ring: #ef233c;
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-  /* Visible focus ring on the pink background (default outline-ring/50
-     is too low-contrast against #ef9fbd) */
+  /* Visible focus ring on the yellow background (default outline-ring/50
+     is too low-contrast against #fde047) */
   :where(button, a, [role="button"], input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--color-dowgnut-blue-dark);
     outline-offset: 3px;
@@ -148,16 +148,16 @@
 /* ── DowgNut graffiti utilities ─────────────────────────── */
 @layer utilities {
   .glass-card {
-    background: rgba(253, 239, 235, 0.85);
+    background: rgba(255, 249, 219, 0.85);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(7, 51, 79, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 32px rgba(29, 53, 87, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
   .dark .glass-card {
-    background: rgba(7, 51, 79, 0.7);
-    border: 1px solid rgba(239, 159, 189, 0.2);
+    background: rgba(29, 53, 87, 0.7);
+    border: 1px solid rgba(253, 224, 71, 0.2);
   }
   .graffiti-text {
     font-family: var(--font-display), cursive, sans-serif;
@@ -167,15 +167,15 @@
     line-height: 1;
   }
   .brand-stroke {
-    -webkit-text-stroke: 2px #07334f;
+    -webkit-text-stroke: 2px #1d3557;
     paint-order: stroke fill;
   }
   .drip-shadow {
-    filter: drop-shadow(0 6px 0 rgba(7, 51, 79, 0.18));
+    filter: drop-shadow(0 6px 0 rgba(29, 53, 87, 0.18));
   }
   .lime-bg-grid {
     background-image:
-      radial-gradient(circle at 1px 1px, rgba(7, 51, 79, 0.08) 1px, transparent 0);
+      radial-gradient(circle at 1px 1px, rgba(29, 53, 87, 0.08) 1px, transparent 0);
     background-size: 22px 22px;
   }
   .scrollbar-dowgnut::-webkit-scrollbar {
@@ -186,13 +186,13 @@
     background: transparent;
   }
   .scrollbar-dowgnut::-webkit-scrollbar-thumb {
-    background: #07579b55;
+    background: #1d355755;
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: content-box;
   }
   .scrollbar-dowgnut::-webkit-scrollbar-thumb:hover {
-    background: #07579b99;
+    background: #1d355799;
     background-clip: content-box;
   }
   .animate-float {

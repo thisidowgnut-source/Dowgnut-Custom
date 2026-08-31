@@ -38,3 +38,24 @@ Stage Summary:
 - 28/28 flavor kini mempunyai imej yang sepadan dari segi warna/topping dengan nama.
 - Konsep/nama/flavor/description/harga TIDAK diubah — hanya imgUrl dibetulkan.
 - 12 fail branded duplikasi (kartun) kekal di folder tapi tidak digunakan — boleh dipadam kemudian jika mahu.
+
+---
+Task ID: logo-theme-rebrand
+Agent: main (Z.ai Code)
+Task: Ganti logo rasmi baru (Doh-Nut) + re-theme ikut palet logo (konsep kekal)
+
+Work Log:
+- Analisa logo rasmi dengan VLM: kuning #FDE047 (bg), merah #EF233C (blob), navy #1D3557 (border/teks), putih. Vibe playful/bubbly.
+- Proses logo (sharp): 2048px JPEG 1.5MB → PNG optimized 424KB wordmark + app-icon-512/192 + maskable + apple-touch-icon + favicon-new.png.
+- globals.css: token swap (NAMA kekal, nilai baru) — background #fde047 (kuning logo), foreground #1d3557 (navy), primary #ef233c (merah), secondary navy, cream→#fff9db butter, lime→#fde047, pink→#ef233c, dough→#e8c468. Utilities (glass-card, brand-stroke, drip-shadow, lime-bg-grid, scrollbar) dikemas kini. Dark block juga.
+- layout.tsx: themeColor #FDE047 + favicon → favicon-new.png.
+- manifest.json: theme_color #FDE047, background_color #FFF9DB.
+- splash-screen: glow #e8f866→#fde047.
+- admin-dashboard: 8 hardcoded hex lama → palet baru.
+- Struktur komponen/layout/konsep TIDAK diubah — hanya nilai warna.
+
+Stage Summary:
+- Logo baru dipasang di header + splash + semua ikon PWA.
+- Tema: kuning-merah-navy dari logo rasmi — VLM verify: "highly consistent and cohesive, no contrast issues".
+- Splash VLM verify: logo kuning pop pada navy bg, "clean, professional".
+- Contrast: navy #1d3557 pada kuning ≈ 9.9:1 (AAA); putih pada merah #ef233c ≈ 4.6:1 (AA bold).

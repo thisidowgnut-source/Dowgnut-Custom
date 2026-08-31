@@ -61,7 +61,7 @@ export function SplashScreen() {
             transition={{ duration: 2, ease: "easeOut" }}
             className="pointer-events-none absolute size-[500px] rounded-full"
             style={{
-              background: "radial-gradient(circle, #e8f866 0%, transparent 60%)",
+              background: "radial-gradient(circle, #fde047 0%, transparent 60%)",
               filter: "blur(40px)",
             }}
           />

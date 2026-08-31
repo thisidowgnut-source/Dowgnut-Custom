@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   applicationName: "DowgNut",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: [{ url: "/favicon-new.png", type: "image/png", sizes: "256x256" }],
     apple: "/apple-touch-icon.png",
   },
   appleWebApp: {
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07579B",
+  themeColor: "#FDE047",
   width: "device-width",
   initialScale: 1,
   
