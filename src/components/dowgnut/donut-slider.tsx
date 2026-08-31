@@ -229,7 +229,7 @@ export function DonutSlider() {
         el &&
         (el.tagName === "INPUT" ||
           el.tagName === "TEXTAREA" ||
-          el.isContentEditable)
+          (el instanceof HTMLElement && el.isContentEditable))
       ) {
         return;
       }
