@@ -59,3 +59,23 @@ Stage Summary:
 - Tema: kuning-merah-navy dari logo rasmi — VLM verify: "highly consistent and cohesive, no contrast issues".
 - Splash VLM verify: logo kuning pop pada navy bg, "clean, professional".
 - Contrast: navy #1d3557 pada kuning ≈ 9.9:1 (AAA); putih pada merah #ef233c ≈ 4.6:1 (AA bold).
+
+---
+Task ID: logo-theme-verify
+Agent: main (Z.ai Code)
+Task: Verifikasi akhir pasca rebrand logo + tema (sambungan sesi terpotong)
+
+Work Log:
+- Semak keadaan: dev server hidup, semua API 200, tiada error runtime.
+- Bersih warning lint terakhir (unused eslint-disable di error-boundary.tsx) → 0 error 0 warning.
+- Agent Browser e2e: page load penuh, tiada console/page error.
+- DOM verify: dowgnut-logo-wordmark.png (1024px, alt "DowgNut logo") loaded di header, semua imej donut ok.
+- VLM verify logo asal upload: "Doh-Nut" — huruf putih ber-outline navy, blob merah, border putih+dalam biru, latar kuning, TM di atas kanan.
+- Ujian interaktif: klik kategori Classic ✓, Add to Cart ✓ (toast + badge), cart drawer ✓, harga RM7.70 (RM3.50 + RM3.70 delivery bawah threshold RM25) ✓.
+- Cart ujian dibersihkan selepas uji.
+- Skrip verify sementara dipadam.
+
+Stage Summary:
+- Logo rasmi Doh-Nut + tema kuning (#FDE047) / merah (#EF233C) / navy (#1D3557) / butter (#FFF9DB) TERPASANG dan TERBUKTI berfungsi e2e.
+- Konsep app, struktur komponen, 32 flavor, AI Concierge, gamification — semua kekal tak berubah.
+- Nota VLM: font bubbly wordmark kadang tersalah baca oleh vision model (Krispy Kreme/Play-Doh) — DOM + analisa logo asal mengesahkan ia wordmark Doh-Nut dari fail upload pengguna.
