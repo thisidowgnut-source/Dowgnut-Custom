@@ -118,6 +118,6 @@ export const useGamification = create<GamificationState>()(
 
       resetStreak: () => set({ streak: 0, lastOrderDate: null }),
     }),
-    { name: "dowgnut-gamification" }
+    { name: "dohnut-gamification" }
   )
 );

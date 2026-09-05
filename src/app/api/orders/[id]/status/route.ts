@@ -11,6 +11,8 @@ const VALID_STATUSES = new Set([
   "delivered",
 ]);
 
+class UnpaidOrderTransitionError extends Error {}
+
 // PATCH /api/orders/[id]/status  { status }  →  Order
 export async function PATCH(
   request: Request,
@@ -40,23 +42,45 @@ export async function PATCH(
       );
     }
 
-    const updated = await db.order.update({
-      where: { id },
-      data: { status },
-      include: { items: true },
-    });
+    if (!existing.paidAt) {
+      return NextResponse.json(
+        { error: "Payment must be confirmed before fulfilment can begin" },
+        { status: 409 },
+      );
+    }
 
-    // Record the transition so the tracking timeline stays truthful.
-    await db.orderEvent.create({
-      data: {
-        orderId: id,
-        status,
-        message: `Status updated to ${status.replace(/_/g, " ")} by admin.`,
-      },
+    const updated = await db.$transaction(async (tx) => {
+      const transition = await tx.order.updateMany({
+        where: { id, paidAt: { not: null } },
+        data: { status },
+      });
+      if (transition.count !== 1) throw new UnpaidOrderTransitionError();
+
+      const order = await tx.order.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+      if (!order) throw new Error("Order disappeared during status transition");
+
+      // Keep the status and its audit event atomic.
+      await tx.orderEvent.create({
+        data: {
+          orderId: id,
+          status,
+          message: `Status updated to ${status.replace(/_/g, " ")} by admin.`,
+        },
+      });
+      return order;
     });
 
     return NextResponse.json(serializeOrder(updated));
   } catch (err) {
+    if (err instanceof UnpaidOrderTransitionError) {
+      return NextResponse.json(
+        { error: "Payment must be confirmed before fulfilment can begin" },
+        { status: 409 },
+      );
+    }
     console.error("[api/orders/[id]/status PATCH]", err);
     return NextResponse.json(
       { error: "Failed to update order status" },

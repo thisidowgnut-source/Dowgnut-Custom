@@ -3,15 +3,16 @@ import { db } from "@/lib/db";
 import { ensureReady } from "@/lib/ensure-ready";
 import { computePricing } from "@/lib/pricing";
 import { serializeOrder } from "@/lib/serialize";
+import { getSessionId } from "@/lib/session";
 
-// POST /api/orders  { sessionId, customerName, customerEmail, customerPhone?, address, city, state?, zip, notes?, paymentMethod? }
-// - reads session cart, snapshots each item, decrements donut stock,
-//   clears cart, returns the created Order with items.
+// POST /api/orders  { customerName, customerEmail, customerPhone?, address, city, state?, zip, notes?, paymentMethod? }
+// - reads session cart and snapshots each item without consuming inventory or
+//   clearing the cart. Those irreversible steps happen only after payment.
 export async function POST(request: Request) {
   try {
     await ensureReady();
     const body = await request.json();
-    const sessionId = String(body.sessionId ?? "").trim();
+    const sessionId = getSessionId(request);
     const customerName = String(body.customerName ?? "").trim();
     const customerEmail = String(body.customerEmail ?? "").trim();
     const customerPhone = String(body.customerPhone ?? "").trim();
@@ -22,12 +23,6 @@ export async function POST(request: Request) {
     const notes = String(body.notes ?? "").trim();
     const paymentMethod = String(body.paymentMethod ?? "").trim();
 
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: "sessionId is required" },
-        { status: 400 }
-      );
-    }
     if (!customerName || !customerEmail || !address || !city || !zip) {
       return NextResponse.json(
         { error: "Missing required customer fields" },
@@ -46,6 +41,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const unavailable = cart.find((item) => item.quantity > item.donut.stock);
+    if (unavailable) {
+      return NextResponse.json(
+        {
+          error: `Insufficient stock for ${unavailable.donut.name} — please refresh and try again.`,
+        },
+        { status: 409 },
+      );
+    }
+
     // Single source of pricing truth — identical to what the cart drawer
     // and checkout view display (threshold is >=, matching the UI).
     const subtotal = cart.reduce(
@@ -54,10 +59,9 @@ export async function POST(request: Request) {
     );
     const { delivery, sst, total } = computePricing(subtotal);
 
-    // Create order + items + decrement stock + clear cart in a transaction.
-    // Stock is validated ATOMICALLY inside the transaction: the conditional
-    // updateMany only succeeds when stock >= quantity, so two concurrent
-    // checkouts can never oversell the same donut.
+    // The order is intentionally non-fulfillable until a signed payment
+    // callback confirms funds. Keeping the cart intact provides a retry path
+    // when Billplz is unavailable or the customer cancels.
     const order = await db.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
@@ -75,7 +79,7 @@ export async function POST(request: Request) {
           sst,
           total,
           paymentMethod,
-          status: "preparing",
+          status: "pending_payment",
           etaMinutes: 25,
           items: {
             create: cart.map((item) => ({
@@ -90,26 +94,11 @@ export async function POST(request: Request) {
         include: { items: true },
       });
 
-      for (const item of cart) {
-        const res = await tx.donut.updateMany({
-          where: { id: item.donutId, stock: { gte: item.quantity } },
-          data: { stock: { decrement: item.quantity } },
-        });
-        if (res.count !== 1) {
-          // Throwing rolls back the WHOLE transaction (order + items).
-          throw new Error(
-            `Insufficient stock for ${item.donut.name} — please refresh and try again.`
-          );
-        }
-      }
-
-      await tx.cartItem.deleteMany({ where: { sessionId } });
-
       await tx.orderEvent.create({
         data: {
           orderId: created.id,
-          status: "preparing",
-          message: "Order received — the fryer is heating up! 🔥",
+          status: "pending_payment",
+          message: "Order saved — awaiting payment confirmation.",
         },
       });
 
@@ -131,19 +120,11 @@ export async function POST(request: Request) {
   }
 }
 
-// GET /api/orders?sessionId=...  →  Order[] (newest first, with items)
+// GET /api/orders  →  Order[] for the request session (newest first)
 export async function GET(request: Request) {
   try {
     await ensureReady();
-    const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get("sessionId") ?? "";
-
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: "sessionId query param is required" },
-        { status: 400 }
-      );
-    }
+    const sessionId = getSessionId(request);
 
     const orders = await db.order.findMany({
       where: { sessionId },

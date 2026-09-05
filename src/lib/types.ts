@@ -39,6 +39,11 @@ export interface Favorite {
 }
 
 export type OrderStatus =
+  | "pending_payment"
+  | "payment_starting"
+  | "payment_failed"
+  | "payment_expired"
+  | "payment_review"
   | "preparing"
   | "baking"
   | "out_for_delivery"
@@ -91,6 +96,7 @@ export interface Order {
   paymentMethod: string;
   paymentRef?: string;
   paymentUrl?: string;
+  paidAt?: string;
   subtotal: number;
   delivery: number;
   sst: number;
@@ -127,4 +133,3 @@ export interface AdminStats {
   recentOrders: (Pick<Order, "id" | "customerName" | "total" | "status" | "createdAt">)[];
   hourlyRevenue: { hour: string; revenue: number }[];
 }
-

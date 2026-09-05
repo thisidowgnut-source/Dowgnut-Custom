@@ -76,3 +76,22 @@ export async function POST(request: Request) {
     );
   }
 }
+
+// DELETE /api/cart  →  CartItem[] (bulk-clear for the calling session)
+// Used by "Clear box" — one round-trip instead of N parallel DELETEs.
+export async function DELETE(request: Request) {
+  try {
+    await ensureReady();
+    const sessionId = getSessionId(request);
+    // Only deletes rows belonging to the requesting session — never touches
+    // other sessions' carts, even if the request were replayed.
+    await db.cartItem.deleteMany({ where: { sessionId } });
+    return NextResponse.json([]);
+  } catch (err) {
+    console.error("[api/cart DELETE]", err);
+    return NextResponse.json(
+      { error: "Failed to clear cart" },
+      { status: 500 }
+    );
+  }
+}

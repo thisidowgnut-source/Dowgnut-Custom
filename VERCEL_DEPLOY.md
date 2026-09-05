@@ -1,8 +1,18 @@
+---
+title: "Deploying DOH-NUT to Vercel"
+document_id: "SMS-DOHNUT-DEPLOY-001"
+version: "1.2.0"
+last_updated: "2026-09-05 09:30:00"
+maintainer: "Antigravity / Sovereign Architect"
+classification: "Internal / Operations Runbook"
+lifecycle_status: "Active / Living Standard"
+---
+
 # Deploying DohNut to Vercel
 
 DohNut is a Next.js 16 app. It deploys to Vercel out of the box. Two things to know:
 
-1. **Database** — the default SQLite setup runs on Vercel's **ephemeral `/tmp`** filesystem. The app auto-creates the schema and re-seeds **32 donuts** (16 originals + 6 Malaysian specialties + 5 savory + 5 classics — see `src/lib/seed-data.ts`) on every cold start (handled by `src/lib/ensure-ready.ts`). This is perfect for a **demo/showcase** — browsing, cart, checkout, AI tools, payment all work. The trade-off: cart/orders/reviews reset when the serverless instance cold-starts. For **persistent** storage, switch to Vercel Postgres (see below).
+1. **Database** — the default SQLite setup runs on Vercel's **ephemeral `/tmp`** filesystem. The app auto-creates the schema and re-seeds **31 donuts** (8 Classics + 6 Sprinkled + 8 Stuffed + 6 Malaysian Specialties + 3 Savory / Sira Series — see `src/lib/seed-data.ts`) on every cold start (handled by `src/lib/ensure-ready.ts`). This is perfect for a **demo/showcase** — browsing, cart, checkout, AI tools, payment all work. The trade-off: cart/orders/reviews reset when the serverless instance cold-starts. For **persistent** storage, switch to Vercel Postgres (see below).
 
 2. **Real-time order tracking** — the WebSocket mini-service (`mini-services/order-tracking/`, port 3004) **cannot run on Vercel** (Vercel is serverless — no long-running processes). The order-tracking screen has a built-in REST polling fallback, so the UI still loads and shows the last-known order status. To get live progressing status, deploy the mini-service separately (Render / Railway / Fly.io) and point the frontend at it.
 
@@ -10,15 +20,15 @@ DohNut is a Next.js 16 app. It deploys to Vercel out of the box. Two things to k
 
 ## Option A — One-click demo deploy (ephemeral SQLite, no setup)
 
-1. Push this repo to GitHub (already at `https://github.com/thisisniagahub/Doh-Nut-Z.git`).
-2. Go to **https://vercel.com/new** → import the `Doh-Nut-Z` repo.
+1. Push this repo to GitHub (at `https://github.com/thisidowgnut-source/Dowgnut-Custom.git`).
+2. Go to **https://vercel.com/new** → import the `Dowgnut-Custom` repo.
 3. Framework preset: **Next.js** (auto-detected).
 4. Build command: `bun run build` (from `vercel.json`).
 5. Install command: `bun install` (from `vercel.json`).
 6. **No environment variables required** — the SQLite path is auto-resolved to `/tmp/dohnut.db`.
 7. Click **Deploy**. Wait ~2 min.
 
-That's it. The first request to `/api/donuts` lazily creates the schema + seeds 32 donuts.
+That's it. The first request to `/api/donuts` lazily creates the schema + seeds 31 donuts.
 
 > The `postinstall` script runs `prisma generate` so the Prisma Client is built during install.
 
@@ -56,7 +66,7 @@ bun run db:generate
 ### 4. Create tables + seed
 ```bash
 bun run db:push      # creates tables in Postgres
-bun run seed         # inserts 32 donuts (idempotent)
+bun run seed         # inserts 31 donuts (idempotent)
 ```
 
 ### 5. Deploy
@@ -81,7 +91,7 @@ The WebSocket service lives in `mini-services/order-tracking/`. To run it:
 ```bash
 bun install
 bun run db:push      # create local SQLite schema
-bun run seed         # seed 32 donuts
+bun run seed         # seed 31 donuts
 bun run dev          # http://localhost:3000
 ```
 
@@ -102,7 +112,7 @@ bun run dev          # port 3004
 | `src/app/` | Next.js App Router — single `/` route (SPA) + `/api/*` routes |
 | `src/lib/db.ts` | Prisma client — auto-resolves `/tmp` on Vercel |
 | `src/lib/ensure-ready.ts` | Auto schema-create + seed on cold start (Vercel) |
-| `src/lib/seed-data.ts` | Shared 32-donut catalog (16 originals + 6 Malaysian + 5 savory + extras) |
+| `src/lib/seed-data.ts` | Shared 31-donut catalog (8 Classic + 6 Sprinkled + 8 Stuffed + 6 Malaysian + 3 Savory) |
 | `prisma/schema.prisma` | DB schema (SQLite default; switch to postgres for persistence) |
 | `prisma/seed.ts` | Seed script (`bun run seed`) |
 | `vercel.json` | Vercel build config |
@@ -171,3 +181,9 @@ With these set, hitting checkout redirects to the Billplz sandbox page. Leave th
 > **Security**: `.env` is gitignored. Never commit real API keys. The `ADMIN_API_KEY` previously leaked in git history has been rotated — if you're standing up a fresh instance, generate a new one (e.g. `openssl rand -hex 32`).
 
 > **Removed**: `@copilotkit/*` packages, `/api/copilotkit` route, and the in-app Sparkles button have been **removed** (was a paid SaaS dependency). AI Concierge now runs on the in-house `/api/ai/concierge` route with no third-party runtime cost.
+
+## 📋 Audit & Revision Ledger (SMS-v1.0)
+| Version | Timestamp (MYT) | Author | Why (Intent / Trigger) | How (Modifications & Touched Areas) | Validation Proof |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `1.2.0` | 2026-09-05 09:30:00 | Sovereign Conductor | Alignment semua dokumen projek (.md) | Tambah SMS-v1.0 frontmatter & ledger; selaras 31 SKU katalog, repo URL | `bun run build`: 13/13 pages OK |
+| `1.0.0` | 2026-08-25 12:00:00 | Core Team | Dokumentasi deployment Vercel awal | Prosedur deploy serverless SQLite & Postgres | Vercel production pass |

@@ -2,6 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { ensureReady } from "@/lib/ensure-ready";
 import { getBillplzConfig, verifyWebhook } from "@/lib/billplz";
+import {
+  confirmOrderPayment,
+  markOrderPaymentFailed,
+} from "@/lib/order-payment-lifecycle";
 
 /**
  * Billplz posts a webhook here when payment status changes.
@@ -30,6 +34,7 @@ export async function POST(req: NextRequest) {
   const billId = params.get("id");
   const paid = params.get("paid") === "true";
   const paidAmount = params.get("paid_amount");
+  const collectionId = params.get("collection_id");
   const reference1 = params.get("reference_1"); // our order id
 
   if (!billId || !reference1) {
@@ -45,55 +50,42 @@ export async function POST(req: NextRequest) {
   }
 
   // Cross-check: the bill id must match the one we created for this order.
-  if (order.paymentRef && order.paymentRef !== billId) {
+  if (order.paymentRef !== billId) {
     console.warn(
       `[billplz] bill id mismatch for order ${order.id}: expected ${order.paymentRef}, got ${billId}`,
     );
     return NextResponse.json({ ok: false, reason: "bill_mismatch" }, { status: 400 });
   }
 
+  if (collectionId && collectionId !== cfg.collectionId) {
+    console.warn(
+      `[billplz] collection mismatch for order ${order.id}`,
+    );
+    return NextResponse.json({ ok: false, reason: "collection_mismatch" }, { status: 400 });
+  }
+
   if (paid && !order.paidAt) {
     // Cross-check: the amount actually paid must match the order total.
-    const paidSen = paidAmount ? Number(paidAmount) : null;
+    const paidSen = paidAmount === null ? Number.NaN : Number(paidAmount);
     const expectedSen = Math.round(order.total * 100);
-    if (paidSen != null && paidSen < expectedSen) {
+    if (!Number.isSafeInteger(paidSen) || paidSen !== expectedSen) {
       console.warn(
-        `[billplz] underpayment for order ${order.id}: paid ${paidSen} sen < ${expectedSen} sen`,
+        `[billplz] amount mismatch for order ${order.id}: paid ${paidAmount ?? "missing"} sen, expected ${expectedSen} sen`,
       );
       return NextResponse.json({ ok: false, reason: "amount_mismatch" }, { status: 400 });
     }
 
-    // Conditional update — guards against duplicate/concurrent callbacks.
-    const res = await db.order.updateMany({
-      where: { id: order.id, paidAt: null },
-      data: {
-        paidAt: new Date(),
-        paidAmount: paidSen != null ? paidSen / 100 : order.total,
-        status: "preparing", // kick off order prep
-      },
+    await confirmOrderPayment({
+      orderId: order.id,
+      paidAmount: paidSen / 100,
+      message: "Payment received — starting to bake! 🍩",
     });
-    if (res.count === 1) {
-      await db.orderEvent.create({
-        data: {
-          orderId: order.id,
-          status: "preparing",
-          message: "Payment received — starting to bake! 🍩",
-        },
-      });
-    }
-  } else if (!paid && order.paidAt) {
-    // Refund / chargeback — revert to unpaid.
-    await db.order.update({
-      where: { id: order.id },
-      data: { paidAt: null, paidAmount: null, status: "preparing" },
-    });
-    await db.orderEvent.create({
-      data: {
-        orderId: order.id,
-        status: "preparing",
-        message: "Payment refunded — order reverted.",
-      },
-    });
+  } else if (!paid && !order.paidAt) {
+    await markOrderPaymentFailed(order.id);
+  } else if (!paid) {
+    // A paid order needs an explicit refund/chargeback workflow. Never erase
+    // payment history or rewind fulfilment based only on a later false flag.
+    console.warn(`[billplz] non-paid update received for paid order ${order.id}`);
   }
 
   return NextResponse.json({ ok: true });

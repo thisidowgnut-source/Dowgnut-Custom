@@ -1,14 +1,24 @@
+---
+title: "DOH-NUT — Malaysian Donut Drop Documentation"
+document_id: "SMS-DOHNUT-README-001"
+version: "1.2.0"
+last_updated: "2026-09-05 09:30:00"
+maintainer: "Antigravity / Sovereign Architect"
+classification: "Public / Project Overview"
+lifecycle_status: "Active / Living Standard"
+---
+
 # 🍩 DOHNUT — Malaysian Donut Drop, Hot Out The Fryer 🔥
 
 > **Graffiti, glazed, and unapologetically local.** A mobile-first donut delivery app with a hypebeast shell, Malaysian soul, and zero BS.
 
-![DOHNUT wordmark](./public/brand/dowgnut-logo-wordmark.png)
+![DOHNUT wordmark](./public/brand/dohnut-logo-wordmark.png)
 
 ---
 
 ## 🛎️ What Is This?
 
-**DOHNUT** is a Next.js 16 + React 19 single-page donut shop that feels like a sneaker drop. Browse **32 curated flavors** (16 classics + 6 Malaysian specials + 5 savory + 5 more), swipe-deck your way to a craving, drop into a glassmorphic cart, and pay with **Billplz** (FPX / TnG / DuitNow QR). Live order tracking. AI Concierge. Optional signup that actually saves you time. **SST 6%** handled. **Free delivery over RM25.** RM3.99 flat below.
+**DOHNUT** is a Next.js 16 + React 19 single-page donut shop that feels like a sneaker drop. Browse **31 curated flavors** (8 Classics + 6 Sprinkled + 8 Stuffed + 6 Malaysian Specialties + 3 Savory / Sira Series), swipe-deck your way to a craving, drop into a glassmorphic cart, and pay with **Billplz** (FPX / TnG / DuitNow QR). Live order tracking. AI Concierge. Optional signup that actually saves you time. **SST 6%** handled. **Free delivery over RM25.** RM3.99 flat below.
 
 The whole thing deploys to **Vercel in one click** and ships with a real-time tracking mini-service you can host separately when you need WebSocket magic.
 
@@ -19,49 +29,49 @@ The whole thing deploys to **Vercel in one click** and ships with a real-time tr
 | Feature | Icon | Where It Lives | Notes |
 |---|---|---|---|
 | 🛒 **Glassmorphic cart drawer** | `bg-lime/30` when free delivery unlocks | `src/components/dohnut/cart-drawer.tsx` | Drag handle, hover-shrink remove, dashed-border total |
-| 🍩 **32-donut catalog** | 6 Malaysian + 5 savory + classics | `src/lib/seed-data.ts` | Auto-seeded on Vercel cold start |
+| 🍩 **31-donut catalog** | 8 Classic + 6 Sprinkled + 8 Stuffed + 6 Malaysian + 3 Savory | `src/lib/seed-data.ts` | Auto-seeded on Vercel cold start (100% unique 1024x1024 assets) |
 | 💳 **Billplz payments** | FPX, TnG, DuitNow QR | `src/app/api/payment/billplz/*` | HMAC-SHA256 webhook, dev fallback when unconfigured |
 | 📍 **Live order tracking** | WebSocket + REST polling fallback | `mini-services/order-tracking/` | Deploy separately (Render / Railway / Fly.io) |
-| 🤖 **AI Concierge** | Floating FAB, safe-area aware | `src/components/dohnut/ai-concierge.tsx` | `/api/ai/concierge` — no paid SaaS, in-house |
-| 🎨 **AI Designer** | Generate donut illustrations | `src/components/dohnut/ai-designer.tsx` | `/api/ai/designer` |
+| 🤖 **AI Concierge** | Floating FAB, safe-area aware | `src/components/dohnut/ai-concierge.tsx` | `/api/ai/concierge` — DOH BOY™ persona & rate-limited |
+| 🎨 **AI Designer** | Generate donut illustrations | `src/components/dohnut/ai-designer.tsx` | `/api/ai/designer` — Visual DNA & rate-limited |
 | 👤 **Optional customer profile** | Auto-creates on first checkout | `src/store/use-shop.ts` | Saved addresses, recently viewed, Zustand-persisted |
 | ❤️ **Favorites** | One-tap save | `src/app/api/favorites/*` | Persisted per session |
 | 📜 **Order history** | Live tracking + receipts | `src/components/dohnut/orders-view.tsx` | Bottom-nav "Orders" tab |
 | 🖱️ **Swipe deck** | "Pick your poison" card stack | `src/components/dohnut/swipe-view.tsx` | Keyboard nav ←/→/Enter/Space |
 | 🔎 **Search + filter** | All / Classic / Sprinkled / Stuffed / Specialty / Savory | `src/components/dohnut/shop-home.tsx` | Vertical grid, not a carousel |
-| 🌗 **Light / Dark themes** | next-themes | `src/app/layout.tsx` | Brand tokens survive both modes |
-| ♿ **WCAG AA contrast** | Focus-visible 2px outline + 3px offset | `src/app/globals.css` | `--muted-foreground` bumped to #3d5266 |
+| 🌗 **Light / Dark themes** | Official brand tokens | `src/app/globals.css` | Yellow `#FDE047`, Red `#EF233C`, Navy `#1D3557` |
+| ♿ **WCAG AA contrast** | Focus-visible 2px outline + 3px offset | `src/app/globals.css` | `--muted-foreground` calibrated for accessibility |
 | 📱 **PWA-ready splash** | 1.6s entrance, respects `prefers-reduced-motion` | `src/components/dohnut/splash-screen.tsx` | sessionStorage guarded |
 | 🛡️ **Admin dashboard** | Order overview, KPIs | `src/components/dohnut/admin-dashboard.tsx` | Guarded by `ADMIN_API_KEY` |
-| 💾 **Auto-reseed** | Schema + 32 donuts on cold start | `src/lib/ensure-ready.ts` | Vercel `/tmp` ephemeral SQLite |
+| 💾 **Auto-reseed** | Schema + 31 donuts on cold start | `src/lib/ensure-ready.ts` | Vercel `/tmp` ephemeral SQLite |
 
 ---
 
-## 🇲🇾 Malaysian-First Flavor Lineup
+## 🇲🇾 31-Flavor Catalog Breakdown
 
-We didn't just translate. We *flavor-engineered* the lineup for Malaysian palates:
+Every donut features a 100% unique, high-resolution photo-realistic asset:
 
-### 🍩 Sweet — Malaysian Specialties
-| Donut | Vibe | Tags |
+### 🌿 Malaysian Specialties (6 Flavors)
+| Donut | Vibe & Ingredients | Tags |
 |---|---|---|
-| 🌿 **Pandan Gula Melaka** | Fragrant pandan leaves + caramelized palm sugar glaze | `specialty`, Malaysian |
-| 🍵 **Teh Tarik Dream** | Milk-tea pulled-foam glaze over a yeasted shell | `specialty`, Malaysian |
-| 🌰 **Durian King Cream** | Stuffed with Musang King pulp. You know what you're signing up for | `stuffed`, Malaysian, ⚠️ |
-| 🟢 **Onde-Onde Stuffed** | Pandan dough, coconut-palm sugar molten core | `stuffed`, Malaysian |
-| 🍫 **Milo Dinosaur Crunch** | Milo powder avalanche over chocolate base + crunchies | `sprinkled`, Malaysian |
-| 🍩 **Kopi-O Glaze** | Charred-coffee glaze, zero nonsense | `classic`, Malaysian |
+| **Pandan Gula Melaka** | Fragrant pandan leaves + caramelized palm sugar drizzle | `specialty`, `malaysian` |
+| **Teh Tarik Kaw Glaze** | Pulled milk-tea foam glaze over fluffy yeast shell | `specialty`, `malaysian` |
+| **Musang King Durian Bomb** | Filled with real Musang King golden pulp lava | `specialty`, `malaysian`, `stuffed` |
+| **Cameron Strawberry Drip** | Cameron Highlands strawberry puree & ruby drizzle | `specialty`, `malaysian` |
+| **Ipoh White Coffee Glaze** | Roasted Ipoh coffee beans infused into silky glaze | `specialty`, `malaysian` |
+| **Teh Tarik Classic Foam** | Light black tea glaze with frothy condensed milk foam | `specialty`, `malaysian` |
 
-### 🧂 Savory — The Full Set
-| Donut | Vibe | Tags |
+### 🧂 Savory / Sira Series (3 Flavors)
+| Donut | Vibe & Ingredients | Tags |
 |---|---|---|
-| 🥚 **Salted Egg Yolk Bomb** | Gula Melaka butter + salted egg yolk lava | `savory`, `stuffed` |
-| 🧀 **Cheese & Chive Loaded** | Cream cheese + chive, soft-baked | `savory`, `classic` |
-| 🍕 **Pepperoni Pizza Ring** | Tomato glaze + mozzarella + spicy pepperoni | `savory`, `sprinkled` |
-| 🍄 **Truffle Parmesan** | Black truffle oil + aged Parm | `savory`, `classic` |
-| 🌶️ **Spicy Sambal Cheese** | Real sambal, cheddar crown | `savory`, `sprinkled` |
+| **Kuih Burger Malaysia** | Sliced donut bun, sweet-spicy sambal bilis, cucumber & crispy ikan bilis | `savory`, `malaysian` |
+| **Sira Kuih Keria** | Sweet potato dough donut coated with crackly crystallized Gula Melaka | `savory`, `malaysian` |
+| **Sira Sambal** | Glossy lacquered spicy sambal sira glaze topped with toasted sesame seeds | `savory`, `malaysian` |
 
-### 🍩 Classic Line (16 more)
-Strawberry Drip, Chocolate Classic, Chocolate Sprinkle, Matcha Classic, Matcha Sprinkle, Strawberry Classic, Strawberry Stuffed, Teh Tarik, Kopi, Pandan Matcha, Durian Cream, Teh Tarik Classic, Kopi Classic, plus rotating limited drops.
+### 🍩 Classics & Favourites (22 Flavors)
+- **Classic (8)**: Classic Glazed, Chocolate Cake Classic, Maple Glaze Ring, Powdered Sugar Donut, Cinnamon Sugar Twist, Old-Fashioned Sour Cream, Toasted Coconut Glaze, Hainanese Kopi-O Glaze.
+- **Sprinkled (6)**: Rainbow Birthday Sprinkle, Chocolate Sprinkle Bomb, Strawberry Funfetti, Vanilla Bean Jimmie, Confetti Fiesta Sparkle, Matcha White Choco Sprinkle.
+- **Stuffed (8)**: Boston Cream Bomb, Raspberry Jelly Burst, Cookies & Cream Core, Lemon Curd Pocket, Salted Caramel Cloud, Nutella Hazelnut Lava, Blueberry Cheesecake Fill, Strawberries & Cream Stuffed.
 
 ---
 
@@ -91,7 +101,7 @@ bun install                # or: npm install / pnpm install / yarn
 
 # 2. Set up DB (SQLite default)
 bun run db:push            # create schema
-bun run seed               # seed 32 donuts
+bun run seed               # seed 31 donuts
 
 # 3. Run dev server
 bun run dev                # http://localhost:3000
@@ -177,7 +187,7 @@ src/
 │       └── admin/stats/              # Dashboard KPIs
 ├── components/dohnut/               # All branded components
 ├── lib/
-│   ├── seed-data.ts                  # 32-donut catalog
+│   ├── seed-data.ts                  # 31-donut catalog
 │   ├── ensure-ready.ts               # Auto-reseed on cold start
 │   ├── billplz.ts                    # Billplz client + HMAC verify
 │   ├── types.ts                      # Shared TypeScript types
@@ -205,7 +215,7 @@ public/
 | ![Detail](./public/brand/donuts/matcha-sprinkle.png) | ![Cart](./public/brand/donuts/strawberry-drip.png) |
 | ![Checkout](./public/brand/hero/hero-blue.png) | ![Tracking](./public/brand/donuts/pandan-matcha.png) |
 
-> Brand assets live under `public/brand/`. Donut photography is photo-realistic (per spec), not AI-generated — same vibe across all 32 SKUs.
+> Brand assets live under `public/brand/`. Donut photography is photo-realistic (per spec), not AI-generated — consistent 1024x1024 framing across all 31 SKUs.
 
 ---
 
@@ -247,3 +257,10 @@ Private / All Rights Reserved. Contact the maintainer for licensing inquiries.
 ---
 
 > **DOHNUT** — *GOOD VIBE. GOOD DOH.*
+
+## 📋 Audit & Revision Ledger (SMS-v1.0)
+| Version | Timestamp (MYT) | Author | Why (Intent / Trigger) | How (Modifications & Touched Areas) | Validation Proof |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `1.2.0` | 2026-09-05 09:30:00 | Sovereign Conductor | Alignment semua dokumen projek (.md) | Tambah SMS-v1.0 frontmatter & ledger; perbetul 31 SKU katalog, path logo rasmi | `bun run build`: 13/13 pages OK |
+| `1.1.0` | 2026-09-02 18:00:00 | Hermes Agent | Rebrand visual & palette | Kemaskini tema kuning/merah/navy dan DOH Language | Browser DOM verified |
+| `1.0.0` | 2026-08-25 12:00:00 | Core Team | Dokumentasi awal projek | Release v1.0 storefront Next.js | Initial release |

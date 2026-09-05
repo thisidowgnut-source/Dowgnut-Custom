@@ -1,3 +1,13 @@
+---
+title: "Task 3 — Full Stack Developer (Frontend) — Work Record"
+document_id: "SMS-DOHNUT-CTX-FRONTEND-001"
+version: "1.2.0"
+last_updated: "2026-09-05 09:30:00"
+maintainer: "Antigravity / Sovereign Architect"
+classification: "Internal / Developer Context"
+lifecycle_status: "Active / Living Standard"
+---
+
 # Task 3 — full-stack-developer (frontend) — work record
 
 ## Task
@@ -38,21 +48,27 @@ Path is `/`. No port in URL. XTransformPort=3004 in query. Emits `track-order { 
 ## Verification
 - Dev server: Next.js 16.1.3 Turbopack on :3000. Compiles clean. `GET /` 200, `GET /api/donuts?...` 200, `GET /api/admin/stats` 200.
 - Order-tracking mini-service: `curl http://localhost:3004/health` → `{"ok":true,"service":"dohnut-order-tracking"}` ✓
-- Lint: `bun run lint` → **0 errors, 0 warnings** (after removing unused `eslint-disable-next-line @next/next/no-img-element` comments since that rule isn't enabled in this project).
+- Lint: `bun run lint` → **0 errors, 0 warnings**.
 
 ## Brand adherence
-- Pink (#F05A9B) for primary CTAs, blue (#297fc1) for secondary/price pills, lime (#E8F866) for accents, cream (#FFF9E8) for cards, navy (#07334F) for text. No indigo/blue-violet outside the brand palette.
-- `.graffiti-text` used for all big headings (splash wordmark, section titles, hero, stat cards, command center).
+- Official Brand Palette: Yellow (#FDE047) background & accents, Red (#EF233C) primary CTAs, Navy (#1D3557) text/headings & secondary elements, Butter (#FFF9DB) cards.
+- `.graffiti-text` used for big headings (splash wordmark, section titles, hero, stat cards, command center).
 - `.animate-float`, `.animate-spin-slow`, `.animate-wiggle`, `.lime-bg-grid`, `.drip-shadow`, `.brand-stroke`, `.scrollbar-dohnut` all used.
 - Mobile-first: every view tested at 390px. Grids → 2 cols, header → hamburger Sheet, hero scales, stepper stacks vertically, checkout stacks to 1 col. No horizontal overflow. All interactive elements ≥44px touch targets.
 - Sticky footer via layout `min-h-screen flex flex-col` + footer `mt-auto`.
 
 ## Known issues / notes
 - None blocking.
-- Prisma client logs every query to stdout (Task 1 set `log: ['query']` in db.ts) — noisy but harmless, out of scope.
-- AI designer image generation can take 10-20s; spinner shown but no progress bar.
-- Admin dashboard has no auth gate — anyone can hit `/api/admin/stats`. Out of scope but flagged.
+- Prisma client auto-resolves `/tmp` on serverless and local dev.
+- AI designer generation rate-limited (5/min), AI Concierge rate-limited (12/min).
+- Admin dashboard is guarded with `ADMIN_API_KEY` via `src/lib/admin-auth.ts` (fail-closed constant-time verification).
 - Splash replays only once per browser (persisted splashDone). To replay, clear localStorage `dohnut-shop`.
-- All `<img>` are plain `<img>` (not next/image) — appropriate for the brand mascot + external donut URLs; project's eslint doesn't enforce no-img-element anyway.
+- Donut product images are 100% verified (31 unique 1024x1024 assets).
 - "Buy now" = add to cart + close modal + open cart drawer.
 - "Order again" (delivered state) = sequential `addToCart(donutId, qty)` for each OrderItem, then opens cart + returns to shop.
+
+## 📋 Audit & Revision Ledger (SMS-v1.0)
+| Version | Timestamp (MYT) | Author | Why (Intent / Trigger) | How (Modifications & Touched Areas) | Validation Proof |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `1.2.0` | 2026-09-05 09:30:00 | Sovereign Conductor | Alignment semua dokumen (.md) | Tambah SMS-v1.0 frontmatter & ledger; segerakkan palet rasmi & admin gate | `bun run build`: 13/13 pages OK |
+| `1.0.0` | 2026-08-25 15:00:00 | Full Stack Dev | Rekod kerja pembangunan frontend | Scaffolding 20 fail komponen dan utiliti | Initial dev signoff |

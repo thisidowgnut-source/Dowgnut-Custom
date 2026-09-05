@@ -45,6 +45,7 @@ interface ShopState {
   // catalog
   donuts: Donut[];
   loadingDonuts: boolean;
+  donutsError: string | null;
   filterType: string;
   search: string;
   sort: string;
@@ -145,6 +146,7 @@ export const useShop = create<ShopState>()(
 
       donuts: [],
       loadingDonuts: false,
+      donutsError: null,
       filterType: "all",
       search: "",
       sort: "catalog",
@@ -193,13 +195,16 @@ export const useShop = create<ShopState>()(
       },
 
       loadDonuts: async () => {
-        set({ loadingDonuts: true });
+        set({ loadingDonuts: true, donutsError: null });
         try {
           const url = buildDonutsUrl(get());
           const data = await apiFetch<Donut[]>(url);
-          set({ donuts: data || [] });
-        } catch {
-          set({ donuts: [] });
+          set({ donuts: data || [], donutsError: null });
+        } catch (error) {
+          set({
+            donutsError:
+              error instanceof Error ? error.message : "Failed to load donuts",
+          });
         } finally {
           set({ loadingDonuts: false });
         }
@@ -257,9 +262,8 @@ export const useShop = create<ShopState>()(
             body: JSON.stringify({ donutId, quantity }),
           });
           set({ cart: data || [] });
-        } catch {
-          /* toast handled by caller */
-          throw new Error("Failed to add to cart");
+        } catch (err) {
+          throw err instanceof Error ? err : new Error("Failed to add to cart");
         }
       },
       updateCartQty: async (cartItemId, quantity) => {
@@ -269,8 +273,8 @@ export const useShop = create<ShopState>()(
             body: JSON.stringify({ quantity }),
           });
           set({ cart: data || [] });
-        } catch {
-          /* noop */
+        } catch (err) {
+          throw err instanceof Error ? err : new Error("Failed to update quantity");
         }
       },
       removeFromCart: async (cartItemId) => {
@@ -279,14 +283,20 @@ export const useShop = create<ShopState>()(
             method: "DELETE",
           });
           set({ cart: data || [] });
-        } catch {
-          /* noop */
+        } catch (err) {
+          throw err instanceof Error ? err : new Error("Failed to remove item");
         }
       },
       clearCart: async () => {
-        const cart = get().cart;
-        await Promise.all(cart.map((c) => get().removeFromCart(c.id)));
-        set({ cart: [] });
+        // Single bulk DELETE instead of N parallel requests (CZ-01). One
+        // round-trip, transactional server-side, no race window where
+        // some items are gone and others remain.
+        try {
+          await apiFetch<CartItem[]>(`/api/cart`, { method: "DELETE" });
+          set({ cart: [] });
+        } catch (err) {
+          throw err instanceof Error ? err : new Error("Failed to clear cart");
+        }
       },
       setCartOpen: (open) => set({ cartOpen: open }),
 
@@ -313,8 +323,11 @@ export const useShop = create<ShopState>()(
             });
             set({ favorites: data || [] });
           }
-        } catch {
-          /* noop */
+        } catch (err) {
+          // Re-throw so the caller's toast actually fires (CZ-03). Previously
+          // the heart would not toggle, no toast showed, and the user thought
+          // the action succeeded when it hadn't reached the server.
+          throw err instanceof Error ? err : new Error("Failed to update favorite");
         }
       },
       isFavorite: (donutId) =>
@@ -326,8 +339,10 @@ export const useShop = create<ShopState>()(
           body: JSON.stringify({ ...payload, sessionId: get().sessionId }),
         });
         // Auto-create / update profile + save address on first checkout so
-        // the next order is one-tap.
-        const { createProfile, saveAddress, profile } = get();
+        // the next order is one-tap. CZ-02: re-read profile AFTER the create
+        // call (it's sync today, but the dependency was implicit and would
+        // break the moment createProfile became async / server-backed).
+        const { profile, createProfile, saveAddress } = get();
         if (!profile) {
           createProfile({
             customerName: payload.customerName,
@@ -335,21 +350,23 @@ export const useShop = create<ShopState>()(
             customerPhone: payload.customerPhone,
           });
         }
-        saveAddress({
-          id:
-            typeof crypto !== "undefined" && "randomUUID" in crypto
-              ? crypto.randomUUID()
-              : `a-${Date.now().toString(36)}`,
-          label: "Home",
-          customerName: payload.customerName,
-          customerPhone: payload.customerPhone,
-          address: payload.address,
-          city: payload.city,
-          state: payload.state,
-          zip: payload.zip,
-          isDefault: true,
-        });
-        set({ cart: [] });
+        const fresh = get().profile;
+        if (fresh) {
+          saveAddress({
+            id:
+              typeof crypto !== "undefined" && "randomUUID" in crypto
+                ? crypto.randomUUID()
+                : `a-${Date.now().toString(36)}`,
+            label: "Home",
+            customerName: payload.customerName,
+            customerPhone: payload.customerPhone,
+            address: payload.address,
+            city: payload.city,
+            state: payload.state,
+            zip: payload.zip,
+            isDefault: true,
+          });
+        }
         return order;
       },
       loadOrders: async () => {
@@ -443,7 +460,7 @@ export const useShop = create<ShopState>()(
       },
     }),
     {
-      name: "dowgnut-shop",
+      name: "dohnut-shop",
       partialize: (s) => ({
         sessionId: s.sessionId,
         // keep splashDone so it doesn't replay on every refresh

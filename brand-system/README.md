@@ -1,10 +1,20 @@
+---
+title: "DOHNUT Brand System — Single Source of Truth"
+document_id: "SMS-DOHNUT-BRAND-INDEX-001"
+version: "1.2.0"
+last_updated: "2026-09-05 09:30:00"
+maintainer: "Antigravity / Sovereign Architect"
+classification: "Internal / Brand Standards"
+lifecycle_status: "Active / Living Standard"
+---
+
 # DOHNUT Brand System — Single Source of Truth
 
 > **DOHNUT bukan sekadar brand donut. Ia adalah Malaysian-born, digital-first, playful food brand dengan bahasa, karakter, pop-culture universe dan AI creative system tersendiri.**
 
-Versi: v1.0.0 (merged dari perbualan brand development)
-Tarikh merge: 2026-08-31
-Status: FOUNDATION / v1.0
+Versi: v1.2.0 (segerak dengan pembaharuan visual rasmi & promosi produk)  
+Tarikh: 2026-09-05  
+Status: ACTIVE / v1.2  
 
 ---
 
@@ -17,7 +27,7 @@ BRAND GUIDELINES (01-brand-truth.md)
     ↓
 POP CULTURE PLAYBOOK (02-06)
     ↓
-VISUAL AI ENGINE (06-visual-ai-engine.md)
+VISUAL AI ENGINE (06-visual-ai-engine.md + 09-master-image-prompts.md)
     ↓
 AI DOCUMENTATION / OPERATING SYSTEM (07-08)
 ```
@@ -34,6 +44,7 @@ AI DOCUMENTATION / OPERATING SYSTEM (07-08)
 | [06-visual-ai-engine.md](./06-visual-ai-engine.md) | Visual AI Engine v1.0.0 — Creative Genome, Master Prompt, Visual QA | Production Engine |
 | [07-ai-documentation-system.md](./07-ai-documentation-system.md) | Prompts, Skills, Markdown standard, Governance | AI Operating System |
 | [08-architecture-roadmap.md](./08-architecture-roadmap.md) | System map penuh, cabaran, fasa seterusnya | Operating System |
+| [09-master-image-prompts.md](./09-master-image-prompts.md) | Master Image Generation Prompts (Sira Series & Specialty) | Prompt Registry |
 
 ---
 
@@ -56,3 +67,9 @@ Data mesin boleh dibaca: `src/lib/doh-language.ts` (dictionary DOH yang digunaka
 2. Semua copy baharu merujuk dokumen ini sebagai single source of truth.
 3. Parody mesti lulus IP safety guardrails (05-pop-culture-playbook.md).
 4. Visual mesti lulus 3 soalan QA: **CAN I TASTE IT? CAN I FEEL IT? CAN I RECOGNIZE IT?**
+
+## 📋 Audit & Revision Ledger (SMS-v1.0)
+| Version | Timestamp (MYT) | Author | Why (Intent / Trigger) | How (Modifications & Touched Areas) | Validation Proof |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `1.2.0` | 2026-09-05 09:30:00 | Sovereign Conductor | Alignment semua dokumen (.md) | Tambah SMS-v1.0 frontmatter & ledger; indekskan 09-master-image-prompts.md | File verified |
+| `1.0.0` | 2026-08-31 16:00:00 | Hermes Agent | Inisialisasi sistem jenama | Cipta indeks 01-08 dokumen jenama DOHNUT | Baseline documentation |

@@ -2,7 +2,7 @@
 // Injects the `x-session-id` header from localStorage on every call so that
 // cart / favorites / orders stay scoped to the same anonymous browser session.
 
-export const SESSION_KEY = "dowgnut-session";
+export const SESSION_KEY = "dohnut-session";
 
 export function getSessionId(): string {
   if (typeof window === "undefined") return "";

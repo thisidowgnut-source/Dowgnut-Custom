@@ -447,4 +447,51 @@ export const SEED_DONUTS: SeedDonut[] = [
     stock: 45,
     featured: false,
   },
+
+  // ── 🍩 NEW: Sira Series (3 Master Prompt Flavours) ─────────
+  {
+    name: "Kuih Burger Malaysia",
+    description:
+      "Sliced DOH-NUT opened like a Malaysian street-food burger, stuffed with glossy sambal ikan bilis, crispy fried ikan bilis, fresh cucumber slices, and crisp green salad. Savoury, spicy, and uniquely Malaysian.",
+    price: 5.5,
+    type: "savory",
+    imgUrl: "/brand/donuts/kuih-burger-malaysia.png",
+    tags: "sambal,ikan bilis,burger,savoury,malaysian,street-food",
+    rating: 4.9,
+    calories: 380,
+    sugar: 8,
+    fat: 16,
+    stock: 30,
+    featured: true,
+  },
+  {
+    name: "Sira Kuih Keria",
+    description:
+      "Inspired by traditional Malaysian Kuih Keria, this DOH-NUT is coated with authentic gula Melaka sira — a thin, delicate crystallized sugar coating that's amber-brown, slightly glossy, and naturally crackly while preserving the ultra-soft dough underneath.",
+    price: 4.9,
+    type: "specialty",
+    imgUrl: "/brand/donuts/sira-kuih-keria.png",
+    tags: "gula melaka,sira,crystallized,traditional,malaysian,specialty",
+    rating: 4.8,
+    calories: 340,
+    sugar: 22,
+    fat: 12,
+    stock: 35,
+    featured: true,
+  },
+  {
+    name: "Sira Sambal",
+    description:
+      "Coated with authentic Malaysian sambal sira pedas-manis — rich deep red, glossy, sticky, and lacquered. Finished with generous toasted sesame seeds for subtle crunch. Spicy, savoury, sweet, and intensely Malaysian.",
+    price: 5.2,
+    type: "savory",
+    imgUrl: "/brand/donuts/sira-sambal.png",
+    tags: "sambal,sira,spicy,sesame,pedas,malaysian,savoury",
+    rating: 4.8,
+    calories: 360,
+    sugar: 10,
+    fat: 14,
+    stock: 30,
+    featured: true,
+  },
 ];

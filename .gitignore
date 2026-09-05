@@ -55,3 +55,18 @@ server.log
 /skills/
 # local database (auto-created + seeded by ensure-ready)
 db/*.db
+prisma/db/
+*.db
+# Agent cache & internal tools
+.omo/
+.kilo/
+# Bun runtime artifacts
+.bun-cache/
+.bun-tmp/
+# Build/tool output (transient)
+lint.txt
+lint-output.txt
+tsc-out.txt
+# Tool results (verification artifacts)
+/tool-results/
+

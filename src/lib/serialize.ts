@@ -3,6 +3,14 @@
 
 import type { Donut, CartItem, Favorite, Order, OrderItem, Review } from "@/lib/types";
 
+export type PublicCartItem = Omit<CartItem, "sessionId">;
+export type PublicFavorite = Omit<Favorite, "sessionId">;
+export type PublicOrder = Omit<
+  Order,
+  "sessionId" | "paymentRef" | "paymentUrl"
+>;
+export type PublicReview = Omit<Review, "sessionId">;
+
 type DonutRow = {
   id: string;
   name: string;
@@ -63,10 +71,9 @@ type CartItemRow = {
   donut: DonutRow;
 };
 
-export function serializeCartItem(row: CartItemRow): CartItem {
+export function serializeCartItem(row: CartItemRow): PublicCartItem {
   return {
     id: row.id,
-    sessionId: row.sessionId,
     donutId: row.donutId,
     quantity: row.quantity,
     donut: serializeDonut(row.donut),
@@ -81,10 +88,9 @@ type FavoriteRow = {
   donut: DonutRow;
 };
 
-export function serializeFavorite(row: FavoriteRow): Favorite {
+export function serializeFavorite(row: FavoriteRow): PublicFavorite {
   return {
     id: row.id,
-    sessionId: row.sessionId,
     donutId: row.donutId,
     donut: serializeDonut(row.donut),
   };
@@ -139,10 +145,9 @@ type OrderRow = {
   items: OrderItemRow[];
 };
 
-export function serializeOrder(row: OrderRow): Order {
+export function serializeOrder(row: OrderRow): PublicOrder {
   return {
     id: row.id,
-    sessionId: row.sessionId,
     customerName: row.customerName,
     customerEmail: row.customerEmail,
     customerPhone: row.customerPhone ?? "",
@@ -152,8 +157,7 @@ export function serializeOrder(row: OrderRow): Order {
     zip: row.zip,
     notes: row.notes,
     paymentMethod: row.paymentMethod ?? "",
-    paymentRef: row.paymentRef ?? undefined,
-    paymentUrl: row.paymentUrl ?? undefined,
+    paidAt: row.paidAt?.toISOString(),
     subtotal: row.subtotal,
     delivery: row.delivery,
     sst: row.sst ?? 0,
@@ -175,11 +179,10 @@ type ReviewRow = {
   createdAt: Date;
 };
 
-export function serializeReview(row: ReviewRow): Review {
+export function serializeReview(row: ReviewRow): PublicReview {
   return {
     id: row.id,
     donutId: row.donutId,
-    sessionId: row.sessionId,
     author: row.author,
     rating: row.rating,
     comment: row.comment,

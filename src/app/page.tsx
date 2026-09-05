@@ -1,25 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useShop } from "@/store/use-shop";
 import { useToast } from "@/hooks/use-toast";
-import { SplashScreen } from "@/components/dowgnut/splash-screen";
-import { DowgnutHeader } from "@/components/dowgnut/dowgnut-header";
-import { BottomNav } from "@/components/dowgnut/bottom-nav";
-import { SwipeView } from "@/components/dowgnut/swipe-view";
-import { DonutSlider } from "@/components/dowgnut/donut-slider";
-import { FavoritesView } from "@/components/dowgnut/favorites-view";
-import { CheckoutView } from "@/components/dowgnut/checkout-view";
-import { OrdersView } from "@/components/dowgnut/orders-view";
-import { OrderTrackingView } from "@/components/dowgnut/order-tracking-view";
-import { AdminDashboard } from "@/components/dowgnut/admin-dashboard";
-import { DetailModal } from "@/components/dowgnut/detail-modal";
-import { CartDrawer } from "@/components/dowgnut/cart-drawer";
-import { AIConcierge } from "@/components/dowgnut/ai-concierge";
-import { AIDesigner } from "@/components/dowgnut/ai-designer";
-import { ShopHome } from "@/components/dowgnut/shop-home";
-import { ErrorBoundary } from "@/components/dowgnut/error-boundary";
+import { SplashScreen } from "@/components/dohnut/splash-screen";
+import { DohnutHeader } from "@/components/dohnut/dohnut-header";
+import { BottomNav } from "@/components/dohnut/bottom-nav";
+import { SwipeView } from "@/components/dohnut/swipe-view";
+import { DonutSlider } from "@/components/dohnut/donut-slider";
+import { FavoritesView } from "@/components/dohnut/favorites-view";
+import { CheckoutView } from "@/components/dohnut/checkout-view";
+import { OrdersView } from "@/components/dohnut/orders-view";
+import { OrderTrackingView } from "@/components/dohnut/order-tracking-view";
+import { AdminDashboard } from "@/components/dohnut/admin-dashboard";
+import { DetailModal } from "@/components/dohnut/detail-modal";
+import { CartDrawer } from "@/components/dohnut/cart-drawer";
+import { AIConcierge } from "@/components/dohnut/ai-concierge";
+import { AIDesigner } from "@/components/dohnut/ai-designer";
+import { ShopHome } from "@/components/dohnut/shop-home";
+import { ErrorBoundary } from "@/components/dohnut/error-boundary";
+import { apiFetch } from "@/lib/api";
+import { classifyPaymentState } from "@/lib/payment-state";
+import type { Order } from "@/lib/types";
 
 // NOTE: AdminDashboard (recharts) + OrderTrackingView (socket.io-client) were
 // trialled as next/dynamic code-splits but that deadlocks with
@@ -31,27 +34,86 @@ export default function Home() {
   const view = useShop((s) => s.view);
   const init = useShop((s) => s.init);
   const startTracking = useShop((s) => s.startTracking);
-  const profile = useShop((s) => s.profile);
+  const setView = useShop((s) => s.setView);
   const { toast } = useToast();
+  const paymentReturnHandled = useRef(false);
 
   useEffect(() => {
     init();
   }, [init]);
 
-  // Billplz redirects the payer back to `/?paid=<orderId>` after checkout.
-  // Land them straight in live tracking + confirm with a toast, then scrub
-  // the param so a refresh doesn't replay it.
+  // A redirect is not proof of payment. Reload the session-owned order and
+  // wait briefly for a signed webhook before announcing success.
   useEffect(() => {
-    const paid = new URLSearchParams(window.location.search).get("paid");
-    if (!paid) return;
-    window.history.replaceState(null, "", window.location.pathname);
-    startTracking(paid, profile?.customerName ?? "");
-    toast({
-      title: "Payment received 🍩",
-      description:
-        "DOH BOLEH! Your order is confirmed — the fryer is warming up.",
-    });
-  }, [startTracking, profile, toast]);
+    if (paymentReturnHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("payment_return") ?? params.get("paid");
+    if (!orderId) return;
+    paymentReturnHandled.current = true;
+
+    let cancelled = false;
+    const verifyReturn = async () => {
+      try {
+        let order: Order | null = null;
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          order = await apiFetch<Order>(`/api/orders/${encodeURIComponent(orderId)}`);
+          if (classifyPaymentState({ status: order.status, paidAt: order.paidAt }) !== "pending") {
+            break;
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 1000));
+        }
+        if (cancelled || !order) return;
+
+        const paymentState = classifyPaymentState({
+          status: order.status,
+          paidAt: order.paidAt,
+        });
+        if (order.status === "payment_review") {
+          setView("orders");
+          toast({
+            title: "Payment received — order review needed",
+            description: "Your payment is recorded. Our team needs to review item availability before fulfilment.",
+          });
+        } else if (paymentState === "paid") {
+          startTracking(order.id, order.customerName);
+          toast({
+            title: "Payment received 🍩",
+            description: "DOH BOLEH! Your order is confirmed — the fryer is warming up.",
+          });
+        } else if (paymentState === "failed") {
+          setView("checkout");
+          toast({
+            title: "Payment not completed",
+            description: "Your cart is still here. Review it and try payment again.",
+            variant: "destructive",
+          });
+        } else {
+          setView("orders");
+          toast({
+            title: "Payment confirmation pending",
+            description: "We have not received confirmation yet. Your order will update automatically.",
+          });
+        }
+      } catch {
+        if (cancelled) return;
+        setView("orders");
+        toast({
+          title: "Could not verify payment",
+          description: "No success has been recorded. Open Orders to check again.",
+          variant: "destructive",
+        });
+      } finally {
+        if (!cancelled) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      }
+    };
+    void verifyReturn();
+    return () => {
+      cancelled = true;
+      paymentReturnHandled.current = false;
+    };
+  }, [setView, startTracking, toast]);
 
   // Direction note: shop↔slider previously used a zoom crossfade in a
   // separate presence tree — unified into one keyed child for reliability
@@ -60,7 +122,7 @@ export default function Home() {
   return (
     <>
       <SplashScreen />
-      <DowgnutHeader />
+      <DohnutHeader />
       <ErrorBoundary>
         <main className="relative flex flex-1 flex-col overflow-hidden">
           {/* Keyed motion.div WITHOUT AnimatePresence/exit: the old view
@@ -76,7 +138,10 @@ export default function Home() {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="absolute inset-0 pb-16 flex flex-col overflow-y-auto overscroll-contain"
+            // RX-12: pb must account for safe-area-inset-bottom, otherwise
+            // an iPhone home indicator creates a 34px gap between the last
+            // row of content and the bottom nav.
+            className="absolute inset-0 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] flex flex-col overflow-y-auto overscroll-contain"
           >
             {view === "shop" && <ShopHome />}
             {view === "slider" && <DonutSlider />}

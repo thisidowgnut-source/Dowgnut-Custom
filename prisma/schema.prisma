@@ -76,7 +76,7 @@ model Order {
   delivery       Float    @default(3.99)
   sst            Float    @default(0)
   total          Float
-  status         String   @default("preparing") // preparing | baking | out_for_delivery | delivered
+  status         String   @default("pending_payment") // pending_payment | payment_starting | payment_failed | payment_expired | payment_review | preparing | baking | out_for_delivery | delivered
   etaMinutes     Int      @default(25)
   paymentMethod  String   @default("")  // tng | duitnow | fpx | card | billplz
   paymentRef     String?  // Billplz bill id

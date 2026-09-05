@@ -67,7 +67,7 @@ const DDL = [
     "delivery" REAL NOT NULL DEFAULT 3.99,
     "sst" REAL NOT NULL DEFAULT 0,
     "total" REAL NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'preparing',
+    "status" TEXT NOT NULL DEFAULT 'pending_payment',
     "etaMinutes" INTEGER NOT NULL DEFAULT 25,
     "paymentMethod" TEXT NOT NULL DEFAULT '',
     "paymentRef" TEXT,
