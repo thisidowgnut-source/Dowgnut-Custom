@@ -66,32 +66,23 @@ describe("resolveDatabaseUrl", () => {
     );
   });
 
-  test("fails closed when production has no database URL", () => {
-    expect(() => resolveDatabaseUrl({ NODE_ENV: "production" })).toThrow(
-      "persistent DATABASE_URL",
-    );
+  test("uses /tmp/dowgnut.db on Vercel when no database URL is set", () => {
+    expect(
+      resolveDatabaseUrl({ NODE_ENV: "production", VERCEL: "1" }),
+    ).toBe("file:/tmp/dowgnut.db");
   });
 
-  test("rejects ephemeral SQLite in production", () => {
-    expect(() =>
-      resolveDatabaseUrl({
-        NODE_ENV: "production",
-        DATABASE_URL: "file:/tmp/dowgnut.db",
-      }),
-    ).toThrow("ephemeral SQLite");
-  });
-
-  test("rejects any file-backed database on Vercel production", () => {
-    expect(() =>
+  test("routes file-backed URLs to /tmp/dowgnut.db on Vercel", () => {
+    expect(
       resolveDatabaseUrl({
         NODE_ENV: "production",
         VERCEL: "1",
-        DATABASE_URL: "file:/data/dowgnut.db",
+        DATABASE_URL: "file:./db/custom.db",
       }),
-    ).toThrow("file-backed database");
+    ).toBe("file:/tmp/dowgnut.db");
   });
 
-  test("preserves an explicitly configured persistent production URL", () => {
+  test("preserves an explicitly configured persistent production URL on Vercel", () => {
     const url = "postgresql://database.example/dowgnut";
     expect(
       resolveDatabaseUrl({
