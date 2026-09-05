@@ -33,10 +33,16 @@ lifecycle_status: "Active / Living Standard"
   - Dilaraskan rintangan leretan kepada `150px` agar kawalan jari terasa padu dan konsisten.
 - **2026-09-05 (Universal Markdown Alignment & SMS-v1.0 Compliance)**:
   - Selaraskan semua dokumentasi (.md) agar konsisten dengan realiti sistem terkini: 31 perisa katalog unik, palet rasmi (Kuning/Merah/Navy/Butter), dan status pembetulan sistem.
+- **2026-09-05 (Vercel Serverless SQLite Fallback Fix & Deployment Ready)**:
+  - Dibetulkan ralat build Vercel `Production requires a persistent DATABASE_URL; refusing local SQLite fallback` pada [sqlite-path.ts](file:///g:/Doh-Nut/src/lib/sqlite-path.ts).
+  - Ditambah laluan fallback selamat `file:/tmp/dowgnut.db` khusus persekitaran Vercel serverless tanpa persediaan DB luaran (Option A demo deploy).
+  - Diuji dan diluluskan 45/45 ujian unit `bun test` dan binaan Next.js 13/13 halaman statik & pelayan.
+  - Berjaya dideploy ke Vercel production: status `● Ready` dalam 47 saat.
 
 ## 📋 Audit & Revision Ledger (SMS-v1.0)
 | Version | Timestamp (MYT) | Author | Why (Intent / Trigger) | How (Modifications & Touched Areas) | Validation Proof |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| `1.3.0` | 2026-09-05 10:28:00 | Sovereign Conductor | Vercel build failure bugfix | Baiki `resolveDatabaseUrl` untuk /tmp fallback di Vercel & update tests | Vercel build: `● Ready` (47s), 45/45 tests pass |
 | `1.2.0` | 2026-09-05 09:30:00 | Sovereign Conductor | Alignment semua dokumen projek (.md) | Tambah SMS-v1.0 frontmatter & ledger, kemaskini milestone universal | `bun run build`: 13/13 pages OK |
 | `1.1.0` | 2026-09-05 05:25:00 | Sovereign Conductor | Penstabilan fizik 3D slider | Buang `tiltZ`, matikan pulse scale, tune spring critically damped | Manual slider drag test |
 | `1.0.0` | 2026-09-05 04:55:00 | Sovereign Conductor | Audit imej produk & Emil design | Resize 12 imej 2048→1024, jana 3 imej Sira Series | 31/31 rujukan sah (HTTP 200) |
